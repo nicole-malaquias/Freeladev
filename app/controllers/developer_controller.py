@@ -41,7 +41,7 @@ def create_profile():
     except InvalidPasswordError as err:
         return jsonify(err.message)
 
-    except TypeError :
+    except (KeyError,TypeError) :
         err = FieldCreateDeveloperError()
         return jsonify(err.message)
     
