@@ -1,7 +1,7 @@
 from app.configs.database import db
 from app.exceptions.invalidEmail import InvalidEmailError
 from app.exceptions.invalidPassword import InvalidPasswordError
-from app.exceptions.fieldCreateUser import FieldCreateUserError
+from app.exceptions.fieldCreateDev import FieldCreateUserError
 from app.models.developer_model import DeveloperModel
 
 from flask import jsonify, request
