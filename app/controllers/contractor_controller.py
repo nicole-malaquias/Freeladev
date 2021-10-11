@@ -43,9 +43,12 @@ def update_profile_info():
 def delete_profile():
     ...
     
-
 def get_all_contractors():
-    ...
+    session = current_app.db.session
+    contractors = session.query(ContractorModel)\
+                  .all()
+    return jsonify(contractors)
+
 
 
 
