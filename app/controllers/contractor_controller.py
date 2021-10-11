@@ -1,7 +1,7 @@
 from flask_jwt_extended import (create_access_token, get_jwt_identity, jwt_required)
 from flask import request, current_app, jsonify
 import psycopg2
-from app.models.contractor_model import ContractorModel
+from app.models.contractor_model import ContractorModel, FieldCreateContractorError
 from sqlalchemy import exc
 
 def create_profile():
@@ -28,6 +28,10 @@ def create_profile():
         if type(e.orig) == psycopg2.errors.UniqueViolation:  
             return {"message": "User already exists"}, 409
 
+    except TypeError :
+        err = FieldCreateContractorError()
+        return jsonify(err.message)
+
 
 
 
@@ -45,7 +49,10 @@ def delete_profile():
     
 
 def get_all_contractors():
-    ...
+    session = current_app.db.session
+    contractors = session.query(ContractorModel)\
+                  .all()
+    return jsonify(contractors)
 
 
 

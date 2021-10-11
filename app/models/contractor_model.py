@@ -2,6 +2,7 @@ from app.configs.database import db
 from dataclasses import dataclass
 from werkzeug.security import generate_password_hash, check_password_hash
 import re
+from flask import request, jsonify
 @dataclass
 class ContractorModel(db.Model):
     name: str
@@ -51,3 +52,19 @@ class ContractorModel(db.Model):
             return True
         else:
             return False
+
+class FieldCreateContractorError(Exception):
+    def __init__(self):
+        data = request.json
+        data = list(data)
+        problem = [ i for i in data if i not in ["name","email","password","cnpj"] ]
+        self.message = {
+            "Message": {
+                 "available_fields": [
+                "name","email","password","cnpj",
+                ],
+            "Wrong_keys_sended": [*problem]
+            }
+        }
+        super().__init__(self.message)
+
