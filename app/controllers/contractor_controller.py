@@ -17,7 +17,7 @@ def create_profile():
         return jsonify(found_user), 200
     except exc.IntegrityError as e:
         if type(e.orig) == psycopg2.errors.UniqueViolation:  
-            return {"msg": "User already exists"}, 409
+            return {"message": "User already exists"}, 409
 
 
 @jwt_required()
