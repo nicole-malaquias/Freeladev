@@ -6,5 +6,6 @@ def init_app(app: Flask):
   from app.models.developer_model import DeveloperModel
   from app.models.job_model import JobModel
   from app.models.tech_model import TechModel
+  from app.models.developers_techs import DevelopersTechsModel
 
   Migrate(app, app.db)

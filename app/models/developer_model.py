@@ -8,7 +8,7 @@ class DeveloperModel(db.Model):
     name: str
     email: str
     birthdate: datetime
-    
+ 
 
     __tablename__ = 'developers'
 
@@ -18,6 +18,7 @@ class DeveloperModel(db.Model):
     password_hash = db.Column(db.String, nullable=False)
     birthdate = db.Column(db.DateTime(timezone=True), nullable=False)
 
+    technologies = db.relationship('TechModel', secondary='developers_techs', backref=db.backref('developers', lazy='dynamic'))
 
     @property
     def password(self):
