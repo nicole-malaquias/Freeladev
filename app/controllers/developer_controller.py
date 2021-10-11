@@ -1,7 +1,7 @@
 from app.configs.database import db
-from app.exceptions.invalidEmail import InvalidEmailError
-from app.exceptions.invalidPassword import InvalidPasswordError
-from app.exceptions.fieldCreateDev import FieldCreateUserError
+from app.exceptions.invalid_email_exceptions import InvalidEmailError
+from app.exceptions.invalid_password_exceptions import InvalidPasswordError
+from app.exceptions.invalid_field_create_developer_exceptions import FieldCreateDeveloperError
 from app.models.developer_model import DeveloperModel
 
 from flask import jsonify, request
@@ -42,7 +42,7 @@ def create_profile():
         return jsonify(err.message)
 
     except TypeError :
-        err = FieldCreateUserError()
+        err = FieldCreateDeveloperError()
         return jsonify(err.message)
     
     

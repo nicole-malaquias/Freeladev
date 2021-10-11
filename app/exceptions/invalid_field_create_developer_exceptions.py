@@ -1,5 +1,5 @@
 from flask import jsonify, request
-class FieldCreateUserError(Exception):
+class FieldCreateDeveloperError(Exception):
 
     
     def __init__(self):
