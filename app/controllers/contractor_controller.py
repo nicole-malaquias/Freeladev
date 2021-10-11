@@ -29,7 +29,7 @@ def create_profile():
         if type(e.orig) == psycopg2.errors.UniqueViolation:  
             return {"message": "User already exists"}, 409
 
-    except TypeError:
+    except (KeyError, TypeError):
         err = FieldCreateContractorError()
         return jsonify(err.message)
 
