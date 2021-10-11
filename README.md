@@ -123,7 +123,8 @@ freeladev.com/api/developer/signup
 {
   "name": "Thiago Camargo",
   "email": "thiago.camargo@mail.com",
-  "birthdate": "07/07/1998"
+  "birthdate": "07/07/1998",
+  "password": "tatuVerde"
 }
 ```
 
@@ -197,7 +198,7 @@ Poderá conter
 
 ​
 
-### <font color="red"> PATCH </font> Delete Developer
+### <font color="red"> DELETE </font> Delete Developer
 
 ​
 
@@ -234,7 +235,8 @@ freeladev.com/api/contractor/signup
 {
   "name": "Pedro Musk",
   "email": "pedro.space@mail.com",
-  "cnpj": "123.456.789/0000-00"
+  "cnpj": "123.456.789/0000-00",
+  "password": "Muskzin"
 }
 ```
 
@@ -284,7 +286,7 @@ Body poderá conter
 "<font color="lightblue">name</font>",
 "<font color="lightblue">email</font>" e
 "<font color="lightblue">cnpj</font>"
-​
+​\
 <font color="caramel"> Body </font>
 ​
 
@@ -308,7 +310,7 @@ Body poderá conter
 
 ​
 
-### <font color="red"> PATCH </font> Delete Contractor
+### <font color="red"> DELETE </font> Delete Contractor
 
 ​
 
