@@ -2,6 +2,7 @@ from app.configs.database import db
 from dataclasses import dataclass
 from werkzeug.security import generate_password_hash, check_password_hash
 import re
+from flask import request, jsonify
 @dataclass
 class ContractorModel(db.Model):
     name: str
@@ -51,3 +52,6 @@ class ContractorModel(db.Model):
             return True
         else:
             return False
+
+
+
