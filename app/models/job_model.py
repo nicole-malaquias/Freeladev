@@ -23,17 +23,3 @@ class JobModel(db.Model):
     expiration_date = db.Column(db.DateTime(timezone=True), nullable=False)
     progress = db.Column(db.String)
    
-
-
-    @property
-    def password(self):
-        raise AttributeError("Password cannot be accessed!")
-
-
-    @password.setter
-    def password(self, password_to_hash):
-        self.password_hash = generate_password_hash(password_to_hash)
-
-
-    def verify_password(self, password_to_compare):
-        return check_password_hash(self.password_hash, password_to_compare)
