@@ -22,4 +22,6 @@ class JobModel(db.Model):
     difficulty_level = db.Column(db.String, nullable=False)
     expiration_date = db.Column(db.DateTime(timezone=True), nullable=False)
     progress = db.Column(db.String)
-   
+        
+    contractor_id = db.Column(db.Integer, db.ForeignKey('contractors.id'))
+    developer_id = db.Column(db.Integer, db.ForeignKey('developers.id'))
