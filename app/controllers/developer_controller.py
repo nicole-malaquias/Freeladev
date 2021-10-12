@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from app.configs.database import db
 from app.exceptions.invalid_email_exceptions import InvalidEmailError
 from app.exceptions.invalid_password_exceptions import InvalidPasswordError
@@ -10,42 +11,22 @@ from http import HTTPStatus
 from flask_jwt_extended import (create_access_token, get_jwt_identity,
                                 jwt_required)
 
+=======
+from flask_jwt_extended import (create_access_token, get_jwt_identity, jwt_required)
+>>>>>>> 5945dfd675c19b3901aaa80c855b3d92d2c29586
 
 def create_profile():
-    
-    try :
-        
-        data = request.json
-        
-        verify_email = DeveloperModel.verify_pattern_email(data['email'])
-        if not verify_email:
-            raise InvalidEmailError(data)
+    ...
 
-        verify_password = DeveloperModel.verify_pattern_password(data['password'])
-        if not verify_password:
-            raise InvalidPasswordError(data)
-        
-        password_input = data.pop('password')
-        
-        new_dev = DeveloperModel(**data)
-        new_dev.password = password_input
-        
-        db.session.add(new_dev)
-        db.session.commit()
 
-        return jsonify(new_dev),HTTPStatus.CREATED
-        
-    except InvalidEmailError as err:
-        return  jsonify(err.message)
-       
-    except InvalidPasswordError as err:
-        return jsonify(err.message)
-
+<<<<<<< HEAD
     except (KeyError,TypeError) :
         err = FieldCreateDeveloperError()
         return jsonify(err.message)
     
     
+=======
+>>>>>>> 5945dfd675c19b3901aaa80c855b3d92d2c29586
 @jwt_required()
 def get_profile_info():
     ...
@@ -57,7 +38,8 @@ def update_profile_info():
 @jwt_required()
 def delete_profile():
     ...
-    
+
+
 def get_all_developers():
     ...
 
