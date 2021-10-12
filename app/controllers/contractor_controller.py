@@ -2,7 +2,7 @@ from flask_jwt_extended import (create_access_token, get_jwt_identity, jwt_requi
 from flask import request, current_app, jsonify
 import psycopg2
 from app.models.contractor_model import ContractorModel
-from app.exceptions.field_create_contractor_exception import FieldCreateContractorError
+from app.exceptions.contractor_exceptions import FieldCreateContractorError
 from sqlalchemy import exc
 
 def create_profile():
