@@ -12,7 +12,7 @@ def create_profile():
             return "Password must contain from 6 to maximum 20 characters, at least one number, upper and lower case and one special character"
         if not ContractorModel.verify_pattern_email(data['email']):
             return "Email must contain @ and ."
-        if data['cnpj']:
+        if "cnpj" in data:
             if not ContractorModel.verify_cnpj(data['cnpj']):
                 return "cnpj must be in this format: 00.000.000/0000-00"
                 
@@ -46,7 +46,14 @@ def update_profile_info():
 
 @jwt_required()
 def delete_profile():
-    ...
+    contractor = get_jwt_identity()
+    found_contractor = ContractorModel.query.filter_by(email=contractor["email"]).first()
+    if contractor is None:
+        return {"message": "Contractor not found!"}, 404
+    current_app.db.session.delete(found_contractor)
+    current_app.db.session.commit()
+    return "", 204
+
     
 def get_all_contractors():
     session = current_app.db.session
