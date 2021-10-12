@@ -39,6 +39,9 @@ def create_profile():
 @jwt_required()
 def get_profile_info():
     ...
+    # profile_info = get_jwt_identity()
+    
+    # return jsonify(profile_info), 200
 
 @jwt_required()
 def update_profile_info():
