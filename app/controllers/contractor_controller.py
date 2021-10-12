@@ -33,12 +33,10 @@ def create_profile():
         err = FieldCreateContractorError()
         return jsonify(err.message)
 
-
-
-
 @jwt_required()
 def get_profile_info():
-    ...
+    
+    return 'oi'
 
 @jwt_required()
 def update_profile_info():
