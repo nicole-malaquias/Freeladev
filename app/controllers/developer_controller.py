@@ -3,7 +3,8 @@ from app.exceptions.invalid_email_exceptions import InvalidEmailError
 from app.exceptions.invalid_password_exceptions import InvalidPasswordError
 from app.exceptions.invalid_field_create_developer_exceptions import FieldCreateDeveloperError
 from app.models.developer_model import DeveloperModel
-
+import psycopg2
+import sqlalchemy
 from flask import jsonify, request
 
 from http import HTTPStatus
@@ -45,6 +46,14 @@ def create_profile():
         err = FieldCreateDeveloperError()
         return jsonify(err.message)
     
+    except sqlalchemy.exc.IntegrityError as e :
+        
+        if type(e.orig) == psycopg2.errors.NotNullViolation:
+            return {'Message': str(e.orig).split('\n')[0]}, 400
+        
+        if type(e.orig) ==  psycopg2.errors.UniqueViolation:
+            return {'Message': str(e.orig).split('\n')[0]}, 400 
+
     
 @jwt_required()
 def get_profile_info():
