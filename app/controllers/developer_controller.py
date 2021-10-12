@@ -3,8 +3,8 @@ from app.exceptions.invalid_email_exceptions import InvalidEmailError
 from app.exceptions.invalid_password_exceptions import InvalidPasswordError
 from app.exceptions.invalid_field_create_developer_exceptions import FieldCreateDeveloperError
 from app.models.developer_model import DeveloperModel
-from sqlalchemy import exc
 import psycopg2
+import sqlalchemy
 from flask import jsonify, request
 
 from http import HTTPStatus
@@ -13,6 +13,7 @@ from flask_jwt_extended import (create_access_token, get_jwt_identity,
 
 
 def create_profile():
+    
     try :
         
         data = request.json
@@ -41,13 +42,17 @@ def create_profile():
     except InvalidPasswordError as err:
         return jsonify(err.message)
 
-    except exc.IntegrityError as e:
-        if type(e.orig) == psycopg2.errors.UniqueViolation:  
-            return '', 409
-
     except (KeyError,TypeError) :
         err = FieldCreateDeveloperError()
         return jsonify(err.message)
+    
+    except sqlalchemy.exc.IntegrityError as e :
+        
+        if type(e.orig) == psycopg2.errors.NotNullViolation:
+            return {'Message': str(e.orig).split('\n')[0]}, 400
+        
+        if type(e.orig) ==  psycopg2.errors.UniqueViolation:
+            return {'Message': str(e.orig).split('\n')[0]}, 400     
     
     
 @jwt_required()
