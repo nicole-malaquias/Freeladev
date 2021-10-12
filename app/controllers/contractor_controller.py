@@ -2,7 +2,7 @@ from flask_jwt_extended import (create_access_token, get_jwt_identity, jwt_requi
 from flask import request, current_app, jsonify
 import psycopg2
 from app.models.contractor_model import ContractorModel
-from app.exceptions.field_create_contractor_exception import FieldCreateContractorError
+from app.exceptions.contractor_exceptions import FieldCreateContractorError
 from sqlalchemy import exc
 
 def create_profile():
@@ -12,7 +12,7 @@ def create_profile():
             return "Password must contain from 6 to maximum 20 characters, at least one number, upper and lower case and one special character"
         if not ContractorModel.verify_pattern_email(data['email']):
             return "Email must contain @ and ."
-        if data['cnpj']:
+        if "cnpj" in data:
             if not ContractorModel.verify_cnpj(data['cnpj']):
                 return "cnpj must be in this format: 00.000.000/0000-00"
                 
