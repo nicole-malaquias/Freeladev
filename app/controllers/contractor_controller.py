@@ -48,10 +48,11 @@ def update_profile_info():
 def delete_profile():
     contractor = get_jwt_identity()
     found_contractor = ContractorModel.query.filter_by(email=contractor["email"]).first()
-    if contractor is None:
+    if found_contractor is None:
         return {"message": "Contractor not found!"}, 404
-    current_app.db.session.delete(found_contractor)
-    current_app.db.session.commit()
+    if contractor['email'] == found_contractor.email:
+        current_app.db.session.delete(found_contractor)
+        current_app.db.session.commit()
     return "", 204
 
     
