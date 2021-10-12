@@ -1,17 +1,20 @@
 from flask import jsonify, request
 
 
-class FieldCreateContractorError(Exception):
+class FieldCreateDeveloperError(Exception):
+    
     def __init__(self):
         data = request.json
         data = list(data)
-        problem = [ i for i in data if i not in ["name","email","password","cnpj"] ]
+        problem = [ i for i in data if i not in ["name","email","password","birthdate"] ]
+        
         self.message = {
             "Message": {
                  "available_fields": [
-                "name","email","password","cnpj",
+                "name","email","password","birthdate",
                 ],
             "Wrong_keys_sended": [*problem]
             }
+                     
         }
         super().__init__(self.message)
