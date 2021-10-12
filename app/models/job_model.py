@@ -22,7 +22,7 @@ class JobModel(db.Model):
     difficulty_level = db.Column(db.String, nullable=False)
     expiration_date = db.Column(db.DateTime(timezone=True), nullable=False)
     progress = db.Column(db.String)
-    password_hash = db.Column(db.String, nullable=False)
+   
 
 
     @property

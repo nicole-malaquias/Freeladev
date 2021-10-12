@@ -29,7 +29,7 @@ def create_profile():
         if type(e.orig) == psycopg2.errors.UniqueViolation:  
             return {"message": "User already exists"}, 409
 
-    except TypeError:
+    except (KeyError, TypeError):
         err = FieldCreateContractorError()
         return jsonify(err.message)
 
@@ -48,7 +48,6 @@ def update_profile_info():
 def delete_profile():
     ...
     
-
 def get_all_contractors():
     session = current_app.db.session
     contractors = session.query(ContractorModel)\
