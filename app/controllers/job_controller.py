@@ -8,21 +8,12 @@ from flask import current_app, jsonify
 def create_job():
     ...
 
-@jwt_required()
+
 def get_job_by_id(job_id: int):
-        user = get_jwt_identity()
-        found_contractor = ContractorModel.query.filter_by(email=user["email"]).first()
-        found_developer = DeveloperModel.query.filter_by(email=user["email"]).first()
-        job = JobModel.query.filter_by(id=job_id).first()
-        if job is None:
-            return {"message": "Job does not exist"}, 404
-        if found_developer == None:
-                if found_contractor.id == job.contractor_id:
-                    return jsonify(job)
-        else:
-            if found_developer.id == job.developer_id:
-                return jsonify(job)
-        return {"message": "Only the contractor that created the job and the developer that was assigned to the job can see its info"}
+    job = JobModel.query.filter_by(id=job_id).first()
+    if job is None:
+        return {"message": "Job does not exist"}, 404
+    return jsonify(job)
 
 @jwt_required()
 def update_job_by_id(job_id: int):
