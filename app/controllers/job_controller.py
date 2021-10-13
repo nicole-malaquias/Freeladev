@@ -8,7 +8,6 @@ from flask import current_app, jsonify
 def create_job():
     ...
 
-
 def get_job_by_id(job_id: int):
     job = JobModel.query.filter_by(id=job_id).first()
     if job is None:
