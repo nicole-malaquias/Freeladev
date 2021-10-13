@@ -59,9 +59,11 @@ def create_profile():
 def get_profile_info():
     ...
 
+
 @jwt_required()
 def update_profile_info():
     ...
+
 
 @jwt_required()
 def delete_profile():
@@ -69,8 +71,5 @@ def delete_profile():
 
 
 def get_all_developers():
-    ...
-
-
-    
-
+    user_list = DeveloperModel.query.all()
+    return jsonify(user_list), 200
