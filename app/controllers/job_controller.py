@@ -16,27 +16,30 @@ def get_job_by_id(job_id: int):
 
 @jwt_required()
 def update_job_by_id(job_id: int):
-    data = request.json
-    print(data['developer'])
-    contractor = get_jwt_identity()
-    found_contractor = ContractorModel.query.filter_by(email=contractor["email"]).first()
-    job = JobModel.query.filter_by(id=job_id).first()
-    if job is None:
-        return {"message": "Job not found!"}, 404
-    if 'developer' in data:
-        developer_email = data.pop('developer')
-        developer = DeveloperModel.query.filter_by(email=developer_email).first()
-        
-        data['developer_id'] = developer.id
-        print(data)
-    if job.contractor_id == found_contractor.id:
-        JobModel.query.filter_by(id=job_id).update(data)
-        current_app.db.session.commit()
-        updated_job = JobModel.query.filter_by(id=job_id).first()
-        developer = DeveloperModel.query.filter_by(email=developer_email).first()
-        updated_job['developer'] = developer.name
-    # check key errors
-    return jsonify(updated_job)
+    try:
+        data = request.json
+        contractor = get_jwt_identity()
+        found_contractor = ContractorModel.query.filter_by(email=contractor["email"]).first()
+        job = JobModel.query.filter_by(id=job_id).first()
+        if job is None:
+            return {"message": "Job not found!"}, 404
+        if 'developer' in data:
+            developer_email = data.pop('developer')
+            developer = DeveloperModel.query.filter_by(email=developer_email).first()
+            data['developer_id'] = developer.id
+            
+        if job.contractor_id == found_contractor.id:
+            JobModel.query.filter_by(id=job_id).update(data)
+            current_app.db.session.commit()
+            updated_job = JobModel.query.filter_by(id=job_id).first()
+            developer = DeveloperModel.query.filter_by(email=developer_email).first()
+
+        return jsonify({"name": job.name,  "description": job.description, "price": job.price, "difficulty_level": job.difficulty_level, "expiration_date": job.expiration_date, "progress": job.progress, "developer": developer.name})
+
+    
+    except (KeyError, TypeError):
+        err = FieldUpdateJobError()
+        return jsonify(err.message)
 
 @jwt_required()
 def delete_job_by_id(job_id: int):
