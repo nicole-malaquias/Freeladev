@@ -5,6 +5,8 @@ from app.models.contractor_model import ContractorModel
 from app.exceptions.contractor_exceptions import FieldCreateContractorError
 from sqlalchemy import exc
 
+from app.models.developer_model import DeveloperModel
+
 def create_profile():
     try:
         data = request.json
@@ -15,7 +17,12 @@ def create_profile():
         if "cnpj" in data:
             if not ContractorModel.verify_cnpj(data['cnpj']):
                 return "cnpj must be in this format: 00.000.000/0000-00"
-                
+        
+        found_user_in_another_table = DeveloperModel.query.filter_by(email=data['email']).first()
+        
+        if found_user_in_another_table:
+            return {'message': 'Email is already registered as developer. Try another email'}, 409
+        
         session = current_app.db.session
         password_to_hash = data.pop("password")
         new_user = ContractorModel(**data)
