@@ -2,8 +2,10 @@ from flask_jwt_extended import (create_access_token, get_jwt_identity, jwt_requi
 from flask import request, current_app, jsonify
 import psycopg2
 from app.models.contractor_model import ContractorModel
+from app.models.developer_model import DeveloperModel
 from app.exceptions.contractor_exceptions import FieldCreateContractorError
 from sqlalchemy import exc
+import sqlalchemy
 
 def create_profile():
     try:
@@ -16,6 +18,10 @@ def create_profile():
             if not ContractorModel.verify_cnpj(data['cnpj']):
                 return "cnpj must be in this format: 00.000.000/0000-00"
                 
+        email_already_used_as_developer = DeveloperModel.query.filter_by(email=data['email']).first()
+        if email_already_used_as_developer:
+            return {'message': 'Email is already used as developer, please use another one for your contractor account.'}
+
         session = current_app.db.session
         password_to_hash = data.pop("password")
         new_user = ContractorModel(**data)
@@ -24,6 +30,10 @@ def create_profile():
         session.commit()
         found_user = ContractorModel.query.filter_by(email=data["email"]).first()
         return jsonify(found_user), 200
+    
+    except sqlalchemy.exc.IntegrityError as e :
+        if type(e.orig) == psycopg2.errors.NotNullViolation:
+            return {'Message': str(e.orig).split('\n')[0]}, 400
         
     except exc.IntegrityError as e:
         if type(e.orig) == psycopg2.errors.UniqueViolation:  
@@ -32,8 +42,6 @@ def create_profile():
     except (KeyError, TypeError):
         err = FieldCreateContractorError()
         return jsonify(err.message)
-
-
 
 
 @jwt_required()
