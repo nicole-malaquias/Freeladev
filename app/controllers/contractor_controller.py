@@ -1,9 +1,15 @@
-from flask_jwt_extended import (create_access_token, get_jwt_identity, jwt_required)
-from flask import request, current_app, jsonify
 import psycopg2
-from app.models.contractor_model import ContractorModel
 from app.exceptions.contractor_exceptions import FieldCreateContractorError
+from app.exceptions.field_upgrade_exeptions import FieldUpdateContractorError
+
+
+from app.models.contractor_model import ContractorModel
+from app.configs.database import db
+from flask import current_app, jsonify, request
+from flask_jwt_extended import (create_access_token, get_jwt_identity,
+                                jwt_required)
 from sqlalchemy import exc
+import sqlalchemy
 
 def create_profile():
     try:
@@ -44,7 +50,35 @@ def get_profile_info():
 
 @jwt_required()
 def update_profile_info():
-    ...
+    
+    try :
+        
+        data = request.json
+       
+        current_user = get_jwt_identity()
+        user = ContractorModel.query.filter(ContractorModel.email == current_user['email']).update(data)
+        db.session.commit()
+        
+        return jsonify(user)
+
+        
+    except sqlalchemy.exc.IntegrityError as e :
+        
+        if type(e.orig) == psycopg2.errors.NotNullViolation:
+            return {'Message': str(e.orig).split('\n')[0]}, 400
+        
+        if type(e.orig) ==  psycopg2.errors.UniqueViolation:
+            return {'Message': str(e.orig).split('\n')[0]}, 400 
+
+
+    except (FieldUpdateContractorError, sqlalchemy.exc.InvalidRequestError):
+        
+        err = FieldUpdateContractorError()
+        return jsonify(err.message),409
+
+    except sqlalchemy.exc.ProgrammingError:
+         return {'Message': "fields are empty"}
+
 
 @jwt_required()
 def delete_profile():
