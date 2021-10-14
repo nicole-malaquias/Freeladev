@@ -64,22 +64,38 @@ def get_profile_info():
 @jwt_required()
 def update_profile_info():
      
-    try :
+    try:
         
         data = request.json
-       
         current_user = get_jwt_identity()
-        user = DeveloperModel.query.filter(DeveloperModel.email == current_user['email']).update(data)
-        db.session.commit()
+        user = DeveloperModel.query.filter(DeveloperModel.email == current_user['email']).one()
+        
+        if 'password' in data :
+            
+            if DeveloperModel.verify_pattern_password(data['password']) :
+                
+                user.password = data['password']
+                db.session.add(user)
+                db.session.commit()
+                del data['password']
+                
+            else:
+                return "Password must contain from 6 to maximum 20 characters, at least one number, upper and lower case and one special character"
+            
+        if len(data) > 0 :
+            
+            user = DeveloperModel.query.filter(DeveloperModel.email == current_user['email']).update(data)
+            db.session.commit()
+            
+        user = DeveloperModel.query.filter(DeveloperModel.email == current_user['email']).one()   
         
         return jsonify(user)
-
-        
+    
     except sqlalchemy.exc.IntegrityError as e :
-        
+
         if type(e.orig) == psycopg2.errors.NotNullViolation:
             return {'Message': str(e.orig).split('\n')[0]}, 400
-        
+
         if type(e.orig) ==  psycopg2.errors.UniqueViolation:
             return {'Message': str(e.orig).split('\n')[0]}, 400 
 
@@ -90,9 +106,8 @@ def update_profile_info():
         return jsonify(err.message),409
 
     except sqlalchemy.exc.ProgrammingError:
+        
          return {'Message': "fields are empty"}
-
-
 @jwt_required()
 def delete_profile():
     ...
