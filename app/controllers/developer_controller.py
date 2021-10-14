@@ -3,6 +3,7 @@ from app.exceptions.invalid_email_exceptions import InvalidEmailError
 from app.exceptions.invalid_password_exceptions import InvalidPasswordError
 from app.exceptions.invalid_field_create_developer_exceptions import FieldCreateDeveloperError
 from app.models.developer_model import DeveloperModel
+from app.models.contractor_model import ContractorModel
 import psycopg2
 import sqlalchemy
 from flask import jsonify, request
@@ -17,6 +18,10 @@ def create_profile():
     try :
         
         data = request.json
+
+        email_already_used_as_contractor = ContractorModel.query.filter_by(email=data['email']).first()
+        if email_already_used_as_contractor:
+            return {'message': 'Email is already used as contractor, please use another one for your developer account.'}
         
         verify_email = DeveloperModel.verify_pattern_email(data['email'])
         if not verify_email:
