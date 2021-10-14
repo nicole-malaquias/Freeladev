@@ -33,7 +33,7 @@ def create_profile():
     
     except sqlalchemy.exc.IntegrityError as e :
         if type(e.orig) == psycopg2.errors.NotNullViolation:
-            return {'Message': str(e.orig).split('\n')[0]}, 400
+            return {'Message': 'contractor must be created with name, email and password. CNPJ is optional'}, 400
         
     except exc.IntegrityError as e:
         if type(e.orig) == psycopg2.errors.UniqueViolation:  
