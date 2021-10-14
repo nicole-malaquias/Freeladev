@@ -4,6 +4,7 @@ from app.exceptions.invalid_password_exceptions import InvalidPasswordError
 from app.exceptions.invalid_field_create_developer_exceptions import FieldCreateDeveloperError
 from app.exceptions.invalid_field_update_developer_exceptions import FieldUpdateDeveloperError
 from app.models.developer_model import DeveloperModel
+from app.models.contractor_model import ContractorModel
 import psycopg2
 import sqlalchemy
 from flask import jsonify, request
@@ -67,6 +68,14 @@ def update_profile_info():
     try:
         
         data = request.json
+        
+        if 'email' in data :
+        
+            query = ContractorModel.query.filter(ContractorModel.email == data['email']).all()
+            
+            if len(query)  > 0 :
+                return {"Message":"this email is already being used"}
+            
         current_user = get_jwt_identity()
         user = DeveloperModel.query.filter(DeveloperModel.email == current_user['email']).one()
         
