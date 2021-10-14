@@ -3,6 +3,8 @@ from app.models.job_model import JobModel
 from flask import current_app, jsonify, request
 from app.models.contractor_model import ContractorModel
 from app.models.developer_model import DeveloperModel
+from sqlalchemy import exc
+
 @jwt_required()
 def create_job():
     ...
@@ -31,15 +33,13 @@ def update_job_by_id(job_id: int):
         if job.contractor_id == found_contractor.id:
             JobModel.query.filter_by(id=job_id).update(data)
             current_app.db.session.commit()
-            updated_job = JobModel.query.filter_by(id=job_id).first()
-            developer = DeveloperModel.query.filter_by(email=developer_email).first()
+        else:
+            return jsonify({"message": "Only the contractor of this specific job can update it"})
 
         return jsonify({"name": job.name,  "description": job.description, "price": job.price, "difficulty_level": job.difficulty_level, "expiration_date": job.expiration_date, "progress": job.progress, "developer": developer.name})
 
-    
-    except (KeyError, TypeError):
-        err = FieldUpdateJobError()
-        return jsonify(err.message)
+    except exc.InvalidRequestError as e: 
+        return {"message": "The available keys for job update are: name, description, price, difficulty_level, expiration_date, progress and developer"}, 409
 
 @jwt_required()
 def delete_job_by_id(job_id: int):
