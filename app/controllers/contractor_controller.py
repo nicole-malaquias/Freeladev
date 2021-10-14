@@ -1,7 +1,7 @@
 import psycopg2
 from app.exceptions.contractor_exceptions import FieldCreateContractorError
 from app.exceptions.field_upgrade_exeptions import FieldUpdateContractorError
-
+from app.models.developer_model import DeveloperModel
 from app.exceptions.invalid_password_exceptions import InvalidPasswordError
 from app.models.contractor_model import ContractorModel
 from app.configs.database import db
@@ -12,6 +12,7 @@ from sqlalchemy import exc
 import sqlalchemy
 
 def create_profile():
+    
     try:
         data = request.json
         if not ContractorModel.verify_pattern_password(data['password']):
@@ -49,11 +50,18 @@ def get_profile_info():
 def update_profile_info():
     
     try:
-        
+        #adicionar filtro para ver se não existe em outra tabela 
         data = request.json
         current_user = get_jwt_identity()
-        user = ContractorModel.query.filter(ContractorModel.email == current_user['email']).one()
         
+        if data['email'] :
+            
+            query = DeveloperModel.query.filter(DeveloperModel.email == data['email']).all()
+            if len(query)  > 0 :
+                return {"Message":"this email is already being used"}
+            
+        user = ContractorModel.query.filter(ContractorModel.email == current_user['email']).one()
+    
         if 'password' in data :
             
             if ContractorModel.verify_pattern_password(data['password']) :
@@ -84,10 +92,10 @@ def update_profile_info():
             return {'Message': str(e.orig).split('\n')[0]}, 400 
 
 
-    except (FieldUpdateContractorError, sqlalchemy.exc.InvalidRequestError):
+    # except (FieldUpdateContractorError, sqlalchemy.exc.InvalidRequestError):
         
-        err = FieldUpdateContractorError()
-        return jsonify(err.message),409
+    #     err = FieldUpdateContractorError()
+    #     return jsonify(err.message),409
 
     except sqlalchemy.exc.ProgrammingError:
         
