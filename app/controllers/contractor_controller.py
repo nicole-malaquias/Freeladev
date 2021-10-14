@@ -54,9 +54,14 @@ def update_profile_info():
     try :
         
         data = request.json
-       
+        
+        password = data['password']
+        del data['password']
+        
         current_user = get_jwt_identity()
         user = ContractorModel.query.filter(ContractorModel.email == current_user['email']).update(data)
+        user.password = password
+        db.session.add(user)
         db.session.commit()
         
         return jsonify(user)
