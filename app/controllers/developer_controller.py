@@ -59,6 +59,32 @@ def create_profile():
 @jwt_required()
 def get_profile_info():
     user = get_jwt_identity()
+    user["birthdate"] = user["birthdate"][6:16].split()
+
+    if int(user["birthdate"][0]) < 10:
+        user["birthdate"][0] = "0" + user["birthdate"][0]
+
+    mounths = [
+        ("Jan", "01"),
+        ("Feb", "02"),
+        ("Mar", "03"),
+        ("Apr", "04"),
+        ("May", "05"),
+        ("Jun", "06"),
+        ("Jul", "07"),
+        ("Aug", "08"),
+        ("Sep", "09"),
+        ("Oct", "10"),
+        ("Nov", "11"),
+        ("Dec", "12"),
+    ]
+
+    for match in mounths:
+        if match[0] == user["birthdate"][1]:
+            user["birthdate"][1] = match[1]
+
+    user["birthdate"] = "/".join(user["birthdate"])
+
     return user, 200
 
 
