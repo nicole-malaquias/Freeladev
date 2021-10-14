@@ -2,6 +2,7 @@ from app.configs.database import db
 from app.exceptions.invalid_email_exceptions import InvalidEmailError
 from app.exceptions.invalid_password_exceptions import InvalidPasswordError
 from app.exceptions.invalid_field_create_developer_exceptions import FieldCreateDeveloperError
+from app.exceptions.invalid_field_update_developer_exceptions import FieldUpdateDeveloperError
 from app.models.developer_model import DeveloperModel
 import psycopg2
 import sqlalchemy
@@ -62,7 +63,34 @@ def get_profile_info():
 
 @jwt_required()
 def update_profile_info():
-    ...
+     
+    try :
+        
+        data = request.json
+       
+        current_user = get_jwt_identity()
+        user = DeveloperModel.query.filter(DeveloperModel.email == current_user['email']).update(data)
+        db.session.commit()
+        
+        return jsonify(user)
+
+        
+    except sqlalchemy.exc.IntegrityError as e :
+        
+        if type(e.orig) == psycopg2.errors.NotNullViolation:
+            return {'Message': str(e.orig).split('\n')[0]}, 400
+        
+        if type(e.orig) ==  psycopg2.errors.UniqueViolation:
+            return {'Message': str(e.orig).split('\n')[0]}, 400 
+
+
+    except (FieldUpdateDeveloperError, sqlalchemy.exc.InvalidRequestError):
+        
+        err = FieldUpdateDeveloperError()
+        return jsonify(err.message),409
+
+    except sqlalchemy.exc.ProgrammingError:
+         return {'Message': "fields are empty"}
 
 
 @jwt_required()
