@@ -20,7 +20,7 @@ def create_profile():
                 
         email_already_used_as_developer = DeveloperModel.query.filter_by(email=data['email']).first()
         if email_already_used_as_developer:
-            return {'message': 'Email is already used as developer, please use another one for your contractor account.'}
+            return {'message': 'Email is already used as developer, please use another one for your contractor account.'}, 409
 
         session = current_app.db.session
         password_to_hash = data.pop("password")

@@ -21,13 +21,13 @@ def create_profile():
 
         email_already_used_as_contractor = ContractorModel.query.filter_by(email=data['email']).first()
         if email_already_used_as_contractor:
-            return {'message': 'Email is already used as contractor, please use another one for your developer account.'}
+            return {'message': 'Email is already used as contractor, please use another one for your developer account.'}, 409
         
         verify_email = DeveloperModel.verify_pattern_email(data['email'])
         if not verify_email:
             raise InvalidEmailError(data)
 
-        verify_password = DeveloperModel.verify_pattern_password(data['password'])
+        verify_password = DeveloperModel.verify_pattern_password(data['password']), 409
         if not verify_password:
             raise InvalidPasswordError(data)
         
@@ -49,12 +49,12 @@ def create_profile():
 
     except (KeyError,TypeError) :
         err = FieldCreateDeveloperError()
-        return jsonify(err.message)
+        return jsonify(err.message), 409
     
     except sqlalchemy.exc.IntegrityError as e :
         
         if type(e.orig) == psycopg2.errors.NotNullViolation:
-            return {'Message': str(e.orig).split('\n')[0]}, 400
+            return {'Message': 'Developer must be created with name, email, password and birthdate'}, 400
         
         if type(e.orig) ==  psycopg2.errors.UniqueViolation:
             return {'Message': str(e.orig).split('\n')[0]}, 400     
