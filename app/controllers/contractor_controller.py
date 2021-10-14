@@ -50,13 +50,14 @@ def get_profile_info():
 def update_profile_info():
     
     try:
-        #adicionar filtro para ver se não existe em outra tabela 
+        
         data = request.json
         current_user = get_jwt_identity()
         
-        if data['email'] :
+        if 'email' in data :
             
             query = DeveloperModel.query.filter(DeveloperModel.email == data['email']).all()
+            
             if len(query)  > 0 :
                 return {"Message":"this email is already being used"}
             
