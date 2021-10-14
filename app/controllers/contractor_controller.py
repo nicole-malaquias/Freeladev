@@ -113,25 +113,5 @@ def get_all_contractors():
     return jsonify(contractors)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
+def get_all_contractor_jobs():
+    ... 
