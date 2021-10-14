@@ -27,7 +27,7 @@ def create_profile():
         if not verify_email:
             raise InvalidEmailError(data)
 
-        verify_password = DeveloperModel.verify_pattern_password(data['password']), 409
+        verify_password = DeveloperModel.verify_pattern_password(data['password'])
         if not verify_password:
             raise InvalidPasswordError(data)
         
@@ -38,9 +38,9 @@ def create_profile():
         
         db.session.add(new_dev)
         db.session.commit()
-
-        return jsonify(new_dev),HTTPStatus.CREATED
         
+        return jsonify(new_dev),HTTPStatus.CREATED
+ 
     except InvalidEmailError as err:
         return  jsonify(err.message)
        
@@ -57,7 +57,7 @@ def create_profile():
             return {'Message': 'Developer must be created with name, email, password and birthdate'}, 400
         
         if type(e.orig) ==  psycopg2.errors.UniqueViolation:
-            return {'Message': str(e.orig).split('\n')[0]}, 400     
+            return {'Message': 'Please use another email'}, 400     
     
     
 @jwt_required()
