@@ -1,20 +1,20 @@
 from dataclasses import asdict
+
 import psycopg2
+import sqlalchemy
+from app.configs.database import db
 from app.exceptions.contractor_exceptions import FieldCreateContractorError
 from app.exceptions.field_upgrade_exeptions import FieldUpdateContractorError
-
 from app.exceptions.invalid_password_exceptions import InvalidPasswordError
+from app.exceptions.users_exceptions import UserNotFoundError
 from app.models.contractor_model import ContractorModel
 from app.models.developer_model import DeveloperModel
-from app.configs.database import db
+from app.models.job_model import JobModel
 from flask import current_app, jsonify, request
 from flask_jwt_extended import (create_access_token, get_jwt_identity,
                                 jwt_required)
 from sqlalchemy import exc
-import sqlalchemy
-from app.models.developer_model import DeveloperModel
 
-from app.models.job_model import JobModel
 
 def create_profile():
     try:
@@ -128,21 +128,50 @@ def get_all_contractors():
 @jwt_required()
 def get_all_contractor_jobs():
     current_contractor = get_jwt_identity()
-    found_contractor = ContractorModel.query.filter_by(email=current_contractor['email']).first()
     
-    session = current_app.db.session
-    query = session.query(JobModel)\
-                   .filter(DeveloperModel.id==JobModel.developer_id)\
-                   .filter(JobModel.contractor_id==found_contractor.id)\
-                   .all()
-    serialized_data = []
-    
-    for job in query:
-        serialized_job = {key: value for key, value in asdict(job).items()}
-                
-        del serialized_job['contractor']
-        serialized_job['developer'] = serialized_job['developer']['name']
+    try:
         
-        serialized_data.append(serialized_job)
+        found_contractor = ContractorModel.query.filter_by(email=current_contractor['email']).first()
         
-    return jsonify(serialized_data), 200
+        if not found_contractor:
+            raise UserNotFoundError
+        session = current_app.db.session
+        
+        base_query =  session.query(JobModel)\
+                    .filter(JobModel.contractor_id==found_contractor.id)
+                    
+        jobs_with_dev = base_query\
+                    .filter(DeveloperModel.id==JobModel.developer_id)\
+                    .filter(JobModel.progress!=None)\
+                    .all()
+                    
+        jobs_with_no_progress = base_query\
+                    .filter(JobModel.progress==None)\
+                    .all()
+                    
+        
+        serialized_data = []
+        
+        
+        for job_with_progress in jobs_with_dev:
+            serialized_job = asdict(job_with_progress)
+            
+            del serialized_job['contractor']
+            
+            serialized_job['developer'] = serialized_job['developer']['name']
+            
+            serialized_data.append(serialized_job)
+            
+        
+        for job in jobs_with_no_progress:
+            
+            serialized_job = asdict(job)
+            
+            del serialized_job['contractor']
+                    
+            serialized_data.append(serialized_job)
+        
+        return jsonify(serialized_data), 200
+
+    except UserNotFoundError as e:
+        return {'message': str(e)}, 404
