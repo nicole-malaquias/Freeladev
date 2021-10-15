@@ -1,16 +1,16 @@
-from app.configs.database import db
-from app.exceptions.invalid_email_exceptions import InvalidEmailError
-from app.exceptions.invalid_password_exceptions import InvalidPasswordError
-from app.exceptions.invalid_field_create_developer_exceptions import (
-    FieldCreateDeveloperError,
-)
-from app.models.developer_model import DeveloperModel
+from http import HTTPStatus
+
 import psycopg2
 import sqlalchemy
-from flask import jsonify, request
-
-from http import HTTPStatus
-from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
+from app.configs.database import db
+from app.exceptions.invalid_email_exceptions import InvalidEmailError
+from app.exceptions.invalid_field_create_developer_exceptions import \
+    FieldCreateDeveloperError
+from app.exceptions.invalid_password_exceptions import InvalidPasswordError
+from app.exceptions.users_exceptions import UserNotFoundError
+from app.models.developer_model import DeveloperModel
+from flask import current_app, jsonify, request
+from flask_jwt_extended import get_jwt_identity, jwt_required
 
 
 def create_profile():
@@ -95,8 +95,21 @@ def update_profile_info():
 
 @jwt_required()
 def delete_profile():
-    ...
+    current_developer = get_jwt_identity()
+    
+    try:
+        found_developer = DeveloperModel.query.filter_by(email=current_developer['email']).first()
+        if not found_developer:
+            raise UserNotFoundError
+        session = current_app.db.session
 
+        session.delete(found_developer)
+        session.commit()
+
+        return '', 204
+    
+    except UserNotFoundError as e:
+        return {'message': str(e)}, 404
 
 def get_all_developers():
     user_list = DeveloperModel.query.all()
