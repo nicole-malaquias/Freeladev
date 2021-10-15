@@ -1,3 +1,4 @@
+from dataclasses import asdict
 import psycopg2
 from app.exceptions.contractor_exceptions import FieldCreateContractorError
 from app.exceptions.field_upgrade_exeptions import FieldUpdateContractorError
@@ -10,6 +11,9 @@ from flask_jwt_extended import (create_access_token, get_jwt_identity,
                                 jwt_required)
 from sqlalchemy import exc
 import sqlalchemy
+from app.models.developer_model import DeveloperModel
+
+from app.models.job_model import JobModel
 
 def create_profile():
     try:
@@ -112,6 +116,23 @@ def get_all_contractors():
                   .all()
     return jsonify(contractors)
 
-
+@jwt_required()
 def get_all_contractor_jobs():
-    ... 
+    current_contractor = get_jwt_identity()
+    found_contractor = ContractorModel.query.filter_by(email=current_contractor['email']).first()
+    
+    session = current_app.db.session
+    query = session.query(JobModel)\
+                   .filter(DeveloperModel.id==JobModel.developer_id)\
+                   .filter(JobModel.contractor_id==found_contractor.id)\
+                   .all()
+    serialized_data = []
+    
+    for job in query:
+        serialized_job = {key: value for key, value in asdict(job).items()}
+                
+        del serialized_job['contractor']
+        
+        serialized_data.append(serialized_job)
+        
+    return jsonify(serialized_data), 200
