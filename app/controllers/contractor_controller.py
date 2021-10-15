@@ -93,10 +93,10 @@ def update_profile_info():
             return {'Message': str(e.orig).split('\n')[0]}, 400 
 
 
-    # except (FieldUpdateContractorError, sqlalchemy.exc.InvalidRequestError):
+    except (FieldUpdateContractorError, sqlalchemy.exc.InvalidRequestError):
         
-    #     err = FieldUpdateContractorError()
-    #     return jsonify(err.message),409
+        err = FieldUpdateContractorError()
+        return jsonify(err.message),409
 
     except sqlalchemy.exc.ProgrammingError:
         
