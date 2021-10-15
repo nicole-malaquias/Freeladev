@@ -80,7 +80,6 @@ def update_profile_info():
         user = DeveloperModel.query.filter(DeveloperModel.email == current_user['email']).one()
         
         if 'password' in data :
-            
             if DeveloperModel.verify_pattern_password(data['password']) :
                 
                 user.password = data['password']
