@@ -117,6 +117,8 @@ def update_profile_info():
     except sqlalchemy.exc.ProgrammingError:
         
          return {'Message': "fields are empty"}
+     
+     
 @jwt_required()
 def delete_profile():
     ...
