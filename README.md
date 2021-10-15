@@ -91,7 +91,7 @@ freeladev.com/api/login
 
 ```json
 {
-  "name": "Thiago Camargo",
+  "email": "tiago90@gmail.com",
   "password": "freela123"
 }
 ```
@@ -124,7 +124,7 @@ freeladev.com/api/developer/signup
   "name": "Thiago Camargo",
   "email": "thiago.camargo@mail.com",
   "birthdate": "07/07/1998",
-  "password": "tatuVerde"
+  "password": "Bipe2019*#"
 }
 ```
 
@@ -236,7 +236,7 @@ freeladev.com/api/contractor/signup
   "name": "Pedro Musk",
   "email": "pedro.space@mail.com",
   "cnpj": "123.456.789/0000-00",
-  "password": "Muskzin"
+  "password": "Bertyt2017*#"
 }
 ```
 
@@ -267,7 +267,7 @@ freeladev.com/api/contractor/profile
 {
   "name": "Pedro Musk",
   "email": "pedro.space@mail.com",
-  "cnpj": "123.456.789/0000-00"
+  "cnpj": "12.456.789/0000-00"
 }
 ```
 
