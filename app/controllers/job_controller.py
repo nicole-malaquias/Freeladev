@@ -1,12 +1,46 @@
-from flask_jwt_extended import (create_access_token, get_jwt_identity, jwt_required)
+from flask_jwt_extended import (get_jwt_identity, jwt_required)
+from werkzeug.wrappers import request
 from app.models.job_model import JobModel
+
 from app.models.contractor_model import ContractorModel
-from app.models.developer_model import DeveloperModel
 from flask import current_app, jsonify
+
 from app.models.contractor_model import ContractorModel
+from app.exceptions.invalid_field_create_job_exceptions import FieldCreateJobError
+from flask import current_app, jsonify , request
+from app.configs.database import db
+import psycopg2
+import sqlalchemy
+
+
 @jwt_required()
 def create_job():
-    ...
+    try :
+
+        user = get_jwt_identity()
+        contractor = ContractorModel.query.filter(ContractorModel.email == user['email']).all()[0]
+
+        if contractor == None:
+            return {"message": "Only a contractor can create a job"}
+
+        data = request.json
+
+        new_job = JobModel(**data)
+
+        db.session.add(new_job)
+        db.session.commit()
+
+        found_contractor = JobModel.query.filter_by( contractor_id = contractor.id).first()
+        return jsonify(found_contractor)
+
+    except TypeError :
+        err = FieldCreateJobError()
+        return str(err.message),422
+
+    except sqlalchemy.exc.IntegrityError as e :
+
+        if type(e.orig) == psycopg2.errors.NotNullViolation:
+            return {'Message': str(e.orig).split('\n')[0]}, 402
 
 def get_job_by_id(job_id: int):
     job = JobModel.query.filter_by(id=job_id).first()
