@@ -63,6 +63,11 @@ def update_profile_info():
         current_user = get_jwt_identity()
         user = ContractorModel.query.filter(ContractorModel.email == current_user['email']).one()
         
+        if 'email' in data:
+            query = DeveloperModel.query.filter(DeveloperModel.email == data['email']).all()
+            if len(query) > 0 :
+                return {"Message":"This email is already being used"},400
+            
         if 'password' in data :
             
             if ContractorModel.verify_pattern_password(data['password']) :
@@ -74,14 +79,15 @@ def update_profile_info():
                 
             else:
                 return "Password must contain from 6 to maximum 20 characters, at least one number, upper and lower case and one special character"
-            
+        
         if len(data) > 0 :
             
             user = ContractorModel.query.filter(ContractorModel.email == current_user['email']).update(data)
             db.session.commit()
             
+         
         user = ContractorModel.query.filter(ContractorModel.email == current_user['email']).one()   
-        
+       
         return jsonify(user)
     
     except sqlalchemy.exc.IntegrityError as e :
