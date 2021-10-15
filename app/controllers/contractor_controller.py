@@ -4,6 +4,7 @@ from app.exceptions.field_upgrade_exeptions import FieldUpdateContractorError
 
 from app.exceptions.invalid_password_exceptions import InvalidPasswordError
 from app.models.contractor_model import ContractorModel
+from app.models.developer_model import DeveloperModel
 from app.configs.database import db
 from flask import current_app, jsonify, request
 from flask_jwt_extended import (create_access_token, get_jwt_identity,
@@ -22,6 +23,10 @@ def create_profile():
             if not ContractorModel.verify_cnpj(data['cnpj']):
                 return "cnpj must be in this format: 00.000.000/0000-00"
                 
+        email_already_used_as_developer = DeveloperModel.query.filter_by(email=data['email']).first()
+        if email_already_used_as_developer:
+            return {'message': 'Email is already used as developer, please use another one for your contractor account.'}, 409
+
         session = current_app.db.session
         password_to_hash = data.pop("password")
         new_user = ContractorModel(**data)
@@ -30,6 +35,10 @@ def create_profile():
         session.commit()
         found_user = ContractorModel.query.filter_by(email=data["email"]).first()
         return jsonify(found_user), 200
+    
+    except sqlalchemy.exc.IntegrityError as e :
+        if type(e.orig) == psycopg2.errors.NotNullViolation:
+            return {'Message': 'contractor must be created with name, email and password. CNPJ is optional'}, 400
         
     except exc.IntegrityError as e:
         if type(e.orig) == psycopg2.errors.UniqueViolation:  
