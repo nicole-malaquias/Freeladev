@@ -141,6 +141,7 @@ def get_all_contractor_jobs():
         serialized_job = {key: value for key, value in asdict(job).items()}
                 
         del serialized_job['contractor']
+        serialized_job['developer'] = serialized_job['developer']['name']
         
         serialized_data.append(serialized_job)
         
