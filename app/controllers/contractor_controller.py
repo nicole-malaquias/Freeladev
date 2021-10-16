@@ -61,49 +61,46 @@ def get_profile_info():
 @jwt_required()
 def update_profile_info():
     
-    try:
+
         
+    try:
         data = request.json
         current_user = get_jwt_identity()
         user = ContractorModel.query.filter(ContractorModel.email == current_user['email']).one()
-        
+        user_id = user.id
+        if 'email' in data :
+            query = DeveloperModel.query.filter(DeveloperModel.email == data['email']).all()
+            if len(query) > 0 :
+                return {"Message":"this email is already being used"},409
         if 'password' in data :
-            
             if ContractorModel.verify_pattern_password(data['password']) :
-                
                 user.password = data['password']
                 db.session.add(user)
                 db.session.commit()
                 del data['password']
-                
             else:
-                return "Password must contain from 6 to maximum 20 characters, at least one number, upper and lower case and one special character"
-            
+                return "Password must contain from 6 to maximum 20 characters, at least one number, upper and lower case and one special character",409
         if len(data) > 0 :
             
-            user = ContractorModel.query.filter(ContractorModel.email == current_user['email']).update(data)
+            user = ContractorModel.query.filter(ContractorModel.id == user_id).update(data)
             db.session.commit()
-            
-        user = ContractorModel.query.filter(ContractorModel.email == current_user['email']).one()   
+        user = ContractorModel.query.filter(ContractorModel.id == user_id).one()
         
         return jsonify(user)
     
     except sqlalchemy.exc.IntegrityError as e :
-
+        
         if type(e.orig) == psycopg2.errors.NotNullViolation:
             return {'Message': str(e.orig).split('\n')[0]}, 400
-
-        if type(e.orig) ==  psycopg2.errors.UniqueViolation:
-            return {'Message': str(e.orig).split('\n')[0]}, 400 
-
-
-    except (FieldUpdateContractorError, sqlalchemy.exc.InvalidRequestError):
         
+        if type(e.orig) ==  psycopg2.errors.UniqueViolation:
+            return {'Message': str(e.orig).split('\n')[0]}, 400
+        
+    except (FieldUpdateContractorError, sqlalchemy.exc.InvalidRequestError):
         err = FieldUpdateContractorError()
         return jsonify(err.message),409
-
+    
     except sqlalchemy.exc.ProgrammingError:
-        
          return {'Message': "fields are empty"}
 
 
