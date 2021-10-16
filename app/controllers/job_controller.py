@@ -1,47 +1,53 @@
-from flask_jwt_extended import (get_jwt_identity, jwt_required)
-from werkzeug.wrappers import request
-from app.models.job_model import JobModel
+from dataclasses import asdict
 
-from app.models.contractor_model import ContractorModel
-from flask import current_app, jsonify
-
-from app.models.contractor_model import ContractorModel
-from app.exceptions.invalid_field_create_job_exceptions import FieldCreateJobError
-from flask import current_app, jsonify , request
 from app.configs.database import db
-import psycopg2
-import sqlalchemy
+from app.exceptions.users_exceptions import UserNotFoundError
+from app.models.contractor_model import ContractorModel
+from app.models.job_model import JobModel
+from flask import current_app, jsonify, request
+from flask_jwt_extended import get_jwt_identity, jwt_required
+from sqlalchemy.exc import IntegrityError
 
 
 @jwt_required()
 def create_job():
+    
     try :
 
-        user = get_jwt_identity()
-        contractor = ContractorModel.query.filter(ContractorModel.email == user['email']).all()[0]
+        current_contractor = get_jwt_identity()
+        
+        found_contractor = ContractorModel.query.filter_by(email=current_contractor['email']).first()
 
-        if contractor == None:
-            return {"message": "Only a contractor can create a job"}
+        if not found_contractor:
+            raise UserNotFoundError
 
         data = request.json
 
+        data['contractor_id'] = found_contractor.id
+        
         new_job = JobModel(**data)
 
         db.session.add(new_job)
+        
         db.session.commit()
-
-        found_contractor = JobModel.query.filter_by( contractor_id = contractor.id).first()
-        return jsonify(found_contractor)
-
-    except TypeError :
-        err = FieldCreateJobError()
-        return str(err.message),422
-
-    except sqlalchemy.exc.IntegrityError as e :
-
-        if type(e.orig) == psycopg2.errors.NotNullViolation:
-            return {'Message': str(e.orig).split('\n')[0]}, 402
-
+        
+        new_job.format_expiration_date()
+        
+        serialized_data = asdict(new_job)
+        
+        del serialized_data['contractor']
+        
+        del serialized_data['developer']
+        
+        return jsonify(serialized_data), 200
+    
+    except UserNotFoundError as e:
+        return {'message': str(e)}, 404
+    
+    except IntegrityError as e:
+        return {'Message': f'is missing {str(e).split()[5]}'}, 402
+    
+    
 def get_job_by_id(job_id: int):
     job = JobModel.query.filter_by(id=job_id).first()
     if job is None:

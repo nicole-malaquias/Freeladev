@@ -31,3 +31,6 @@ class JobModel(db.Model):
     developer = relationship('DeveloperModel', backref=backref('jobs'))
     contractor = relationship('ContractorModel', backref=backref('jobs'))
     
+    def format_expiration_date(self):
+        self.expiration_date = datetime.strftime(self.expiration_date, "%d/%m/%y %H:%M")
+        print(self.expiration_date)
