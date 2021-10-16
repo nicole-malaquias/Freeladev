@@ -49,20 +49,19 @@ def get_profile_info():
 @jwt_required()
 def update_profile_info():
     
+      
     try:
         
         data = request.json
         current_user = get_jwt_identity()
         
-        if 'email' in data :
-            
-            query = DeveloperModel.query.filter(DeveloperModel.email == data['email']).all()
-            
-            if len(query)  > 0 :
-                return {"Message":"this email is already being used"}
-            
         user = ContractorModel.query.filter(ContractorModel.email == current_user['email']).one()
-    
+
+        query = DeveloperModel.query.filter(DeveloperModel.email == data['email']).all()
+        
+        if len(query) > 0 :
+            return {"Message":"this email is already being used"},409
+        
         if 'password' in data :
             
             if ContractorModel.verify_pattern_password(data['password']) :
@@ -73,7 +72,7 @@ def update_profile_info():
                 del data['password']
                 
             else:
-                return "Password must contain from 6 to maximum 20 characters, at least one number, upper and lower case and one special character"
+                return "Password must contain from 6 to maximum 20 characters, at least one number, upper and lower case and one special character",409
             
         if len(data) > 0 :
             
@@ -93,14 +92,15 @@ def update_profile_info():
             return {'Message': str(e.orig).split('\n')[0]}, 400 
 
 
-    # except (FieldUpdateContractorError, sqlalchemy.exc.InvalidRequestError):
+    except (FieldUpdateContractorError, sqlalchemy.exc.InvalidRequestError):
         
-    #     err = FieldUpdateContractorError()
-    #     return jsonify(err.message),409
+        err = FieldUpdateContractorError()
+        return jsonify(err.message),409
 
     except sqlalchemy.exc.ProgrammingError:
         
          return {'Message': "fields are empty"}
+
 
 
 @jwt_required()
