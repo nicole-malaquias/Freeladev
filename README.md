@@ -15,8 +15,6 @@
 freeladev.com/api
 ```
 
-​
-
 ```json
 {
   "name": "SpaceBlog",
