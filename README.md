@@ -22,9 +22,7 @@ freeladev.com/api
   "price": 3000,
   "difficulty_level": "beginner",
   "expiration_date": "12/12/2021 23:59",
-  "contractor_name": "Thiago Camargo",
-  "contractor_email": "tiago54@gmail.com",
-  "contractor_cnpj": "47.812.481/0001-02 "
+  "contractor": {"name": "Thiago Almeida" "email": "thiagoi43@gmail.com", "cnpj": "12.193/0001-11"}
 }
 ```
 
@@ -444,9 +442,7 @@ Body json can contain:
     "difficulty_level": "beginner",
     "expiration_date": "12/12/2021 23:59",
     "progress": "ongoing",
-    "developer_name": "Filipe Ramos",
-    "developer_email": "filipe43@gmail.com",
-    "developer_birthdate": "01/01/1998"
+    "developer": {"name": "Filipe Ramos", "email": "filipe43@gmail.com", "birthdate": "01/01/1998"}
 ​
 }
 ```
@@ -492,9 +488,7 @@ freeladev.com/api/developer/jobs
     "difficulty_level": "begginer",
     "expiration_date": "06/06/2021 23:59",
     "progress": "completed",
-    "contractor_name": "Thiago Camargo",
-    "contractor_email": "tiago54@gmail.com",
-    "contractor_cnpj": "47.812.481/0001-02 "
+    "contractor": {"name": "Thiago Almeida" "email": "thiagoi43@gmail.com", "cnpj": "12.193/0001-11"}
   },
   {
     "name": "SpaceBlog",
@@ -503,9 +497,7 @@ freeladev.com/api/developer/jobs
     "difficulty_level": "beginner",
     "expiration_date": "12/12/2021 23:59",
     "progress": "ongoing",
-    "contractor_name": "Thiago Camargo",
-    "contractor_email": "tiago54@gmail.com",
-    "contractor_cnpj": "47.812.481/0001-02 "
+    "contractor": {"name": "Thiago Almeida" "email": "thiagoi43@gmail.com", "cnpj": "12.193/0001-11"}
   }
 ]
 ```
@@ -532,9 +524,11 @@ freeladev.com/api/contractor/jobs
     "difficulty_level": "advanced",
     "expiration_date": "08/08/2021 23:59",
     "progress": "completed",
-    "developer_name": "Filipe Ramos",
-    "developer_email": "filipe43@gmail.com",
-    "developer_birthdate": "01/01/1998"
+    "developer": {
+      "name": "Filipe Ramos",
+      "email": "filipe43@gmail.com",
+      "birthdate": "01/01/1998"
+    }
   },
   {
     "name": "SpaceBlog",
@@ -543,9 +537,11 @@ freeladev.com/api/contractor/jobs
     "difficulty_level": "beginner",
     "expiration_date": "12/12/2021 23:59",
     "progress": "ongoing",
-    "developer_name": "Filipe Ramos",
-    "developer_email": "filipe43@gmail.com",
-    "developer_birthdate": "01/01/1998"
+    "developer": {
+      "name": "Filipe Ramos",
+      "email": "filipe43@gmail.com",
+      "birthdate": "01/01/1998"
+    }
   }
 ]
 ```
