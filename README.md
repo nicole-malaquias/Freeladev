@@ -398,7 +398,8 @@ Caso for o Developer que estiver visualizando também terá
 
 ```json
 {
-  "contractor": "Pedro Musk"
+  "contractor": "Pedro Musk",
+  "contractor_email": "pedro87@gmail.com"
 }
 ```
 
@@ -408,7 +409,8 @@ Caso for o Contractor que estiver visualizando também terá
 
 ```json
 {
-  "developer": "Thiago Camargo"
+  "developer": "Thiago Camargo",
+  "developer_email": "tiago32@gmail.com"
 }
 ```
 
@@ -435,7 +437,7 @@ Body poderá conter
 
 ```json
 {
-  "developer": "Vitor Menezes"
+  "developer_email": "vi32@gmail.com"
 }
 ```
 
@@ -476,7 +478,7 @@ NO CONTENT, 204
 
 ​
 
-### <font color="purple"> GET </font> Trabalhos do Developer
+### <font color="purple"> GET </font> Trabalhos do Contractor
 
 ​
 
