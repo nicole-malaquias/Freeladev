@@ -6,8 +6,8 @@ from app.models.contractor_model import ContractorModel
 from app.models.job_model import JobModel
 from flask import current_app, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
-from sqlalchemy.exc import IntegrityError
-
+import sqlalchemy
+import psycopg2
 
 @jwt_required()
 def create_job():
@@ -44,8 +44,9 @@ def create_job():
     except UserNotFoundError as e:
         return {'message': str(e)}, 404
     
-    except IntegrityError as e:
-        return {'Message': f'is missing {str(e).split()[5]}'}, 402
+    except sqlalchemy.exc.IntegrityError as e :
+        if type(e.orig) == psycopg2.errors.NotNullViolation:
+            return {'Message': str(e.orig).split('\n')[0]}, 402
     
     
 def get_job_by_id(job_id: int):
