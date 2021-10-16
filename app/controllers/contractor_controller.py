@@ -56,7 +56,7 @@ def update_profile_info():
         current_user = get_jwt_identity()
         
         user = ContractorModel.query.filter(ContractorModel.email == current_user['email']).one()
-        
+        user_id = user.id
         if 'email' in data :
             
             query = DeveloperModel.query.filter(DeveloperModel.email == data['email']).all()
@@ -77,10 +77,10 @@ def update_profile_info():
             
         if len(data) > 0 :
             
-            user = ContractorModel.query.filter(ContractorModel.email == current_user['email']).update(data)
+            user = ContractorModel.query.filter(ContractorModel.id == user_id).update(data)
             db.session.commit()
             
-        user = ContractorModel.query.filter(ContractorModel.email == data['email']).one()   
+        user = ContractorModel.query.filter(ContractorModel.id == user_id).one()   
         
         return jsonify(user)
     
