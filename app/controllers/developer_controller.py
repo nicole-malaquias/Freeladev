@@ -9,8 +9,14 @@ from app.exceptions.invalid_field_create_developer_exceptions import \
 from app.exceptions.invalid_password_exceptions import InvalidPasswordError
 from app.exceptions.users_exceptions import UserNotFoundError
 from app.models.developer_model import DeveloperModel
-from flask import current_app, jsonify, request
-from flask_jwt_extended import get_jwt_identity, jwt_required
+from app.models.contractor_model import ContractorModel
+import psycopg2
+import sqlalchemy
+from flask import jsonify, request
+
+from http import HTTPStatus
+from flask_jwt_extended import (create_access_token, get_jwt_identity,
+                                jwt_required)
 
 
 def create_profile():
@@ -19,6 +25,10 @@ def create_profile():
 
         data = request.json
 
+        email_already_used_as_contractor = ContractorModel.query.filter_by(email=data['email']).first()
+        if email_already_used_as_contractor:
+            return {'message': 'Email is already used as contractor, please use another one for your developer account.'}, 409
+        
         verify_email = DeveloperModel.verify_pattern_email(data['email'])
         if not verify_email:
             raise InvalidEmailError(data)
@@ -34,9 +44,9 @@ def create_profile():
 
         db.session.add(new_dev)
         db.session.commit()
-
-        return jsonify(new_dev), HTTPStatus.CREATED
-
+        
+        return jsonify(new_dev),HTTPStatus.CREATED
+ 
     except InvalidEmailError as err:
         return jsonify(err.message)
 
@@ -45,17 +55,17 @@ def create_profile():
 
     except (KeyError, TypeError):
         err = FieldCreateDeveloperError()
-        return jsonify(err.message)
-
-    except sqlalchemy.exc.IntegrityError as e:
-
+        return jsonify(err.message), 409
+    
+    except sqlalchemy.exc.IntegrityError as e :
+        
         if type(e.orig) == psycopg2.errors.NotNullViolation:
-            return {'Message': str(e.orig).split('\n')[0]}, 400
-
-        if type(e.orig) == psycopg2.errors.UniqueViolation:
-            return {'Message': str(e.orig).split('\n')[0]}, 400
-
-
+            return {'Message': 'Developer must be created with name, email, password and birthdate'}, 400
+        
+        if type(e.orig) ==  psycopg2.errors.UniqueViolation:
+            return {'Message': 'Please use another email'}, 400     
+    
+    
 @jwt_required()
 def get_profile_info():
     user = get_jwt_identity()
