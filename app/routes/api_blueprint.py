@@ -5,6 +5,7 @@ from app.controllers.job_controller import get_all_jobs
 
 bp = Blueprint('bp_api', __name__, url_prefix='/api')
 
+
 bp.register_blueprint(contractor_blueprint.bp)
 bp.register_blueprint(developer_blueprint.bp)
 bp.register_blueprint(job_blueprint.bp)
