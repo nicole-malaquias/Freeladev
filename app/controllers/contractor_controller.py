@@ -56,11 +56,12 @@ def update_profile_info():
         current_user = get_jwt_identity()
         
         user = ContractorModel.query.filter(ContractorModel.email == current_user['email']).one()
-
-        query = DeveloperModel.query.filter(DeveloperModel.email == data['email']).all()
         
-        if len(query) > 0 :
-            return {"Message":"this email is already being used"},409
+        if 'email' in data :
+            
+            query = DeveloperModel.query.filter(DeveloperModel.email == data['email']).all()
+            if len(query) > 0 :
+                return {"Message":"this email is already being used"},409
         
         if 'password' in data :
             
@@ -79,7 +80,7 @@ def update_profile_info():
             user = ContractorModel.query.filter(ContractorModel.email == current_user['email']).update(data)
             db.session.commit()
             
-        user = ContractorModel.query.filter(ContractorModel.email == current_user['email']).one()   
+        user = ContractorModel.query.filter(ContractorModel.email == data['email']).one()   
         
         return jsonify(user)
     
