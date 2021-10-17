@@ -1,24 +1,34 @@
+from http import HTTPStatus
+
+import psycopg2
+import sqlalchemy
 from app.configs.database import db
 from app.exceptions.invalid_email_exceptions import InvalidEmailError
+from app.exceptions.invalid_field_create_developer_exceptions import \
+    FieldCreateDeveloperError
 from app.exceptions.invalid_password_exceptions import InvalidPasswordError
 from app.exceptions.invalid_field_create_developer_exceptions import FieldCreateDeveloperError
 from app.exceptions.invalid_field_update_developer_exceptions import FieldUpdateDeveloperError
 from app.models.developer_model import DeveloperModel
 from app.models.contractor_model import ContractorModel
+from app.exceptions.users_exceptions import UserNotFoundError
 import psycopg2
 import sqlalchemy
-from flask import jsonify, request
-
+from flask import jsonify, request, current_app
 from http import HTTPStatus
 from flask_jwt_extended import (create_access_token, get_jwt_identity,
                                 jwt_required)
-
+from datetime import datetime
 
 def create_profile():
-    
-    try :
-        
+
+    try:
+
         data = request.json
+
+        email_already_used_as_contractor = ContractorModel.query.filter_by(email=data['email']).first()
+        if email_already_used_as_contractor:
+            return {'message': 'Email is already used as contractor, please use another one for your developer account.'}, 409
         
         verify_email = DeveloperModel.verify_pattern_email(data['email'])
         if not verify_email:
@@ -27,39 +37,67 @@ def create_profile():
         verify_password = DeveloperModel.verify_pattern_password(data['password'])
         if not verify_password:
             raise InvalidPasswordError(data)
-        
+
         password_input = data.pop('password')
-        
+
         new_dev = DeveloperModel(**data)
         new_dev.password = password_input
-        
+
         db.session.add(new_dev)
         db.session.commit()
-
-        return jsonify(new_dev),HTTPStatus.CREATED
         
+        return jsonify(new_dev),HTTPStatus.CREATED
+ 
     except InvalidEmailError as err:
-        return  jsonify(err.message)
-       
+        return jsonify(err.message)
+
     except InvalidPasswordError as err:
         return jsonify(err.message)
 
-    except (KeyError,TypeError) :
+    except (KeyError, TypeError):
         err = FieldCreateDeveloperError()
-        return jsonify(err.message)
+        return jsonify(err.message), 409
     
     except sqlalchemy.exc.IntegrityError as e :
         
         if type(e.orig) == psycopg2.errors.NotNullViolation:
-            return {'Message': str(e.orig).split('\n')[0]}, 400
+            return {'Message': 'Developer must be created with name, email, password and birthdate'}, 400
         
         if type(e.orig) ==  psycopg2.errors.UniqueViolation:
-            return {'Message': str(e.orig).split('\n')[0]}, 400     
+            return {'Message': 'Please use another email'}, 400     
     
     
 @jwt_required()
 def get_profile_info():
-    ...
+    user = get_jwt_identity()
+    user["birthdate"] = user["birthdate"][6:16].split()
+
+    if int(user["birthdate"][0]) < 10:
+        user["birthdate"][0] = "0" + user["birthdate"][0]
+
+    mounths = [
+        ("Jan", "01"),
+        ("Feb", "02"),
+        ("Mar", "03"),
+        ("Apr", "04"),
+        ("May", "05"),
+        ("Jun", "06"),
+        ("Jul", "07"),
+        ("Aug", "08"),
+        ("Sep", "09"),
+        ("Oct", "10"),
+        ("Nov", "11"),
+        ("Dec", "12"),
+    ]
+
+    for match in mounths:
+        if match[0] == user["birthdate"][1]:
+            user["birthdate"][1] = match[1]
+
+    user["birthdate"] = "/".join(user["birthdate"])
+
+    return user, 200
+
 
 
 @jwt_required()
@@ -68,13 +106,19 @@ def update_profile_info():
     try:
         
         data = request.json
+
+        if not DeveloperModel.verify_pattern_email(data['email']):
+            return {"message": "Email must contain @ and ."}, 409
+
+        if not DeveloperModel.verify_birthdate_pattern(data['birthdate']):
+            return {"message": "Birthdate must be in this format: mm/dd/yyyy"}, 409
         
         if 'email' in data :
         
             query = ContractorModel.query.filter(ContractorModel.email == data['email']).all()
             
             if len(query)  > 0 :
-                return {"Message":"this email is already being used"}
+                return {'message': 'Email is already used as contractor, please use another one for your developer account.'}, 409
             
         current_user = get_jwt_identity()
         user = DeveloperModel.query.filter(DeveloperModel.email == current_user['email']).one()
@@ -89,7 +133,7 @@ def update_profile_info():
                 del data['password']
                 
             else:
-                return "Password must contain from 6 to maximum 20 characters, at least one number, upper and lower case and one special character"
+                return "Password must contain from 6 to maximum 20 characters, at least one number, upper and lower case and one special character", 409
             
         if len(data) > 0 :
             
@@ -97,30 +141,45 @@ def update_profile_info():
             db.session.commit()
             
         user = DeveloperModel.query.filter(DeveloperModel.email == current_user['email']).one()   
-        
+        user.birthdate = datetime.strftime(user.birthdate, "%d/%m/%y %H:%M")
         return jsonify(user)
     
+
     except sqlalchemy.exc.IntegrityError as e :
 
         if type(e.orig) == psycopg2.errors.NotNullViolation:
-            return {'Message': str(e.orig).split('\n')[0]}, 400
+            return {'Message': 'Developer must be created with name, email, password and birthdate'}, 400
 
         if type(e.orig) ==  psycopg2.errors.UniqueViolation:
-            return {'Message': str(e.orig).split('\n')[0]}, 400 
+            return {'Message': 'Please use another email'}, 400   
 
 
-    except (FieldUpdateDeveloperError, sqlalchemy.exc.InvalidRequestError):
+    except (FieldUpdateDeveloperError, sqlalchemy.exc.InvalidRequestError, KeyError):
         
         err = FieldUpdateDeveloperError()
         return jsonify(err.message),409
 
     except sqlalchemy.exc.ProgrammingError:
         
-         return {'Message': "fields are empty"}
+         return {'Message': "fields are empty"}, 409
+
 @jwt_required()
 def delete_profile():
-    ...
+    current_developer = get_jwt_identity()
+    
+    try:
+        found_developer = DeveloperModel.query.filter_by(email=current_developer['email']).first()
+        if not found_developer:
+            raise UserNotFoundError
+        session = current_app.db.session
 
+        session.delete(found_developer)
+        session.commit()
+
+        return '', 204
+    
+    except UserNotFoundError as e:
+        return {'message': str(e)}, 404
 
 def get_all_developers():
     user_list = DeveloperModel.query.all()

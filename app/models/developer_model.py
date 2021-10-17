@@ -59,4 +59,13 @@ class DeveloperModel(db.Model):
             return True
         
         return False 
-                
+
+    @staticmethod                
+    def verify_birthdate_pattern(user_birthdate):
+        birthdate_pattern = "^(0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])[- /.](19|20)\d\d$"
+        
+        if(re.search( birthdate_pattern, user_birthdate)):
+            
+            return True
+        
+        return False 
