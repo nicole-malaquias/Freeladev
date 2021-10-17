@@ -12,7 +12,7 @@ from app.models.developer_model import DeveloperModel
 from app.models.contractor_model import ContractorModel
 import psycopg2
 import sqlalchemy
-from flask import jsonify, request
+from flask import jsonify, request, current_app
 
 from http import HTTPStatus
 from flask_jwt_extended import (create_access_token, get_jwt_identity,
