@@ -33,4 +33,3 @@ class JobModel(db.Model):
     
     def format_expiration_date(self):
         self.expiration_date = datetime.strftime(self.expiration_date, "%d/%m/%y %H:%M")
-        print(self.expiration_date)
