@@ -11,6 +11,9 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 import sqlalchemy
 import psycopg2
 from sqlalchemy import exc
+from datetime import datetime
+
+
 @jwt_required()
 def create_job():
     
@@ -66,11 +69,14 @@ def get_job_by_id(job_id: int):
 def update_job_by_id(job_id: int):
     try:
         data = request.json
+        
         contractor = get_jwt_identity()
         found_contractor = ContractorModel.query.filter_by(email=contractor["email"]).first()
         job = JobModel.query.filter_by(id=job_id).first()
         if job is None:
             return {"message": "Job not found!"}, 404
+
+      
         if 'developer' in data:
             developer_email = data.pop('developer')
             developer = DeveloperModel.query.filter_by(email=developer_email).first()
@@ -80,14 +86,21 @@ def update_job_by_id(job_id: int):
             JobModel.query.filter_by(id=job_id).update(data)
             current_app.db.session.commit()
         else:
-            return jsonify({"message": "Only the contractor of this specific job can update it"})
-        if "developer" in data:
-            return jsonify({"name": job.name,  "description": job.description, "price": job.price, "difficulty_level": job.difficulty_level, "expiration_date": job.expiration_date, "progress": job.progress, "developer": [{"name": developer.name, "email": developer.email, "birthdate": developer.birthdate}]})
+            return jsonify({"message": "Only the contractor of this specific job can update it"}), 409
+        if 'developer_id' in data:
+            return jsonify({"name": job.name,  "description": job.description, "price": job.price, "difficulty_level": job.difficulty_level, "expiration_date": datetime.strftime(job.expiration_date, "%d/%m/%y %H:%M"), "progress": job.progress, "developer": [{"name": developer.name, "email": developer.email, "birthdate": datetime.strftime(developer.birthdate, "%d/%m/%y %H:%M")}]})
+        elif job.developer_id >= 1:
+            developer = DeveloperModel.query.filter_by(id=job.developer_id).first()
+            return jsonify({"name": job.name,  "description": job.description, "price": job.price, "difficulty_level": job.difficulty_level, "expiration_date": datetime.strftime(job.expiration_date, "%d/%m/%y %H:%M"), "progress": job.progress, "developer": [{"name": developer.name, "email": developer.email, "birthdate": datetime.strftime(developer.birthdate, "%d/%m/%y %H:%M")}]})
+
         else:
-            return jsonify({"name": job.name,  "description": job.description, "price": job.price, "difficulty_level": job.difficulty_level, "expiration_date": job.expiration_date, "progress": job.progress})
+            return jsonify({"name": job.name,  "description": job.description, "price": job.price, "difficulty_level": job.difficulty_level, "expiration_date": datetime.strftime(job.expiration_date, "%d/%m/%y %H:%M"), "progress": job.progress})
             
     except exc.InvalidRequestError as e: 
         return {"message": "The available keys for job update are: name, description, price, difficulty_level, expiration_date, progress and developer"}, 409
+
+    except sqlalchemy.exc.InvalidRequestError:
+        return {'Message': 'Job must be created with name, description, price, difficulty_level and expiration_date'}, 406
 
 @jwt_required()
 def delete_job_by_id(job_id: int):
