@@ -112,9 +112,14 @@ def update_profile_info():
         if type(e.orig) ==  psycopg2.errors.UniqueViolation:
             return {'Message': str(e.orig).split('\n')[0]}, 409
         
-    except (FieldUpdateContractorError, sqlalchemy.exc.InvalidRequestError):
+    except sqlalchemy.exc.InvalidRequestError:
+        
+        if data.get('password_hash'):
+            
+            del data['password_hash']
         
         err = FieldUpdateContractorError()
+        
         return jsonify(err.message), 409
     
     except sqlalchemy.exc.ProgrammingError:
