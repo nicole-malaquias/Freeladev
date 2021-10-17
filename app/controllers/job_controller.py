@@ -34,9 +34,11 @@ def update_job_by_id(job_id: int):
             current_app.db.session.commit()
         else:
             return jsonify({"message": "Only the contractor of this specific job can update it"})
-
-        return jsonify({"name": job.name,  "description": job.description, "price": job.price, "difficulty_level": job.difficulty_level, "expiration_date": job.expiration_date, "progress": job.progress, "developer": developer.name})
-
+        if "developer" in data:
+            return jsonify({"name": job.name,  "description": job.description, "price": job.price, "difficulty_level": job.difficulty_level, "expiration_date": job.expiration_date, "progress": job.progress, "developer": [{"name": developer.name, "email": developer.email, "birthdate": developer.birthdate}]})
+        else:
+            return jsonify({"name": job.name,  "description": job.description, "price": job.price, "difficulty_level": job.difficulty_level, "expiration_date": job.expiration_date, "progress": job.progress})
+            
     except exc.InvalidRequestError as e: 
         return {"message": "The available keys for job update are: name, description, price, difficulty_level, expiration_date, progress and developer"}, 409
 
