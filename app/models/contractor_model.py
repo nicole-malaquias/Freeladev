@@ -54,4 +54,15 @@ class ContractorModel(db.Model):
             return False
 
 
+    @staticmethod
+    def unique_email(user_email):
+        user = ContractorModel.query.filter_by(email=user_email).first()
+        if user:
+            return True
+
+    @staticmethod
+    def unique_cnpj(user_cnpj):
+        user = ContractorModel.query.filter_by(cnpj=user_cnpj).first()
+        if user:
+            return True
 
