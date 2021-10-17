@@ -24,12 +24,12 @@ def create_profile():
         if not ContractorModel.verify_pattern_email(data['email']):
             return "Email must contain @ and .", 409
         if ContractorModel.unique_email(data['email']):
-            return "You've already registered with this email as a contractor", 409
+            return "You've already registered with this email as a contractor.", 409
         if "cnpj" in data:
             if ContractorModel.unique_cnpj(data['cnpj']):
-                return "You've already registered with this cnpj as a contractor", 409
+                return "You've already registered with this CNPJ as a contractor.", 409
             if not ContractorModel.verify_cnpj(data['cnpj']):
-                return "cnpj must be in this format: 00.000.000/0000-00", 409
+                return "cnpj must be in this format: 00.000.000/0000-00.", 409
                 
         email_already_used_as_developer = DeveloperModel.query.filter_by(email=data['email']).first()
         if email_already_used_as_developer:
@@ -46,7 +46,7 @@ def create_profile():
     
     except sqlalchemy.exc.IntegrityError as e :
         if type(e.orig) == psycopg2.errors.NotNullViolation:
-            return {'Message': 'contractor must be created with name, email and password. CNPJ is optional'}, 400
+            return {'Message': 'contractor must be created with name, email and password, CNPJ is optional.'}, 400
         
     except exc.IntegrityError as e:
         if type(e.orig) == psycopg2.errors.UniqueViolation:  
