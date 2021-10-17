@@ -23,7 +23,11 @@ def create_profile():
             return "Password must contain from 6 to maximum 20 characters, at least one number, upper and lower case and one special character"
         if not ContractorModel.verify_pattern_email(data['email']):
             return "Email must contain @ and ."
+        if ContractorModel.unique_email(data['email']):
+            return "You've already registered with this email as a contractor"
         if "cnpj" in data:
+            if ContractorModel.unique_cnpj(data['cnpj']):
+                return "You've already registered with this cnpj as a contractor"
             if not ContractorModel.verify_cnpj(data['cnpj']):
                 return "cnpj must be in this format: 00.000.000/0000-00"
                 
