@@ -5,13 +5,14 @@ import sqlalchemy
 from app.configs.database import db
 from app.exceptions.contractor_exceptions import FieldCreateContractorError
 from app.exceptions.field_upgrade_exeptions import FieldUpdateContractorError
+from app.exceptions.invalid_email_exceptions import InvalidEmailError
 from app.exceptions.invalid_password_exceptions import InvalidPasswordError
 from app.exceptions.users_exceptions import UserNotFoundError
 from app.models.contractor_model import ContractorModel
 from app.models.developer_model import DeveloperModel
 from app.models.job_model import JobModel
 from flask import current_app, jsonify, request
-from flask_jwt_extended import (create_access_token, get_jwt_identity,
+from flask_jwt_extended import (get_jwt_identity,
                                 jwt_required)
 from sqlalchemy import exc
 
@@ -64,50 +65,67 @@ def get_profile_info():
 
 @jwt_required()
 def update_profile_info():
-    
-
         
     try:
         data = request.json
-        current_user = get_jwt_identity()
-        user = ContractorModel.query.filter(ContractorModel.email == current_user['email']).one()
-        user_id = user.id
-        if 'email' in data :
-            query = DeveloperModel.query.filter(DeveloperModel.email == data['email']).all()
-            if len(query) > 0 :
-                return {"Message":"this email is already being used"},409
-        if 'password' in data :
-            if ContractorModel.verify_pattern_password(data['password']) :
-                user.password = data['password']
-                db.session.add(user)
-                db.session.commit()
-                del data['password']
-            else:
-                return "Password must contain from 6 to maximum 20 characters, at least one number, upper and lower case and one special character",409
-        if len(data) > 0 :
-            
-            user = ContractorModel.query.filter(ContractorModel.id == user_id).update(data)
-            db.session.commit()
-        user = ContractorModel.query.filter(ContractorModel.id == user_id).one()
         
-        return jsonify(user)
+        current_user = get_jwt_identity()
+        
+        user = ContractorModel.query.filter(ContractorModel.email == current_user['email']).first()
+        
+        if 'email' in data.keys():
+            found_email = DeveloperModel.query.filter(DeveloperModel.email == data['email']).first()
+            
+            if found_email:
+                return {"Message":"this email is already being used"}, 409
+            
+            else:
+                if not ContractorModel.verify_pattern_email(data['email']):
+                    raise InvalidEmailError(data)
+                
+        if 'password' in data.keys():
+            
+            if not ContractorModel.verify_pattern_password(data['password']):
+                raise InvalidPasswordError(data)
+            
+            contractor = ContractorModel(password=data.pop('password'))
+            
+            data['password_hash'] = contractor.password_hash
+        
+        if 'cnpj' in data.keys():
+            if not ContractorModel.verify_cnpj(data['cnpj']):
+                return {'Message': "cnpj must be in this format: 00.000.000/0000-00."}, 406
+            
+        ContractorModel.query.filter_by(id=user.id).update(data)
+            
+        db.session.commit()
+    
+        updated_data = ContractorModel.query.get(user.id)
+        
+        return jsonify(updated_data), 200
     
     except sqlalchemy.exc.IntegrityError as e :
         
         if type(e.orig) == psycopg2.errors.NotNullViolation:
-            return {'Message': str(e.orig).split('\n')[0]}, 400
+            return {'Message': 'Contractor must be updated with name, email, password or cnpj'}, 400
         
         if type(e.orig) ==  psycopg2.errors.UniqueViolation:
-            return {'Message': str(e.orig).split('\n')[0]}, 400
+            return {'Message': str(e.orig).split('\n')[0]}, 409
         
     except (FieldUpdateContractorError, sqlalchemy.exc.InvalidRequestError):
+        
         err = FieldUpdateContractorError()
-        return jsonify(err.message),409
+        return jsonify(err.message), 409
     
     except sqlalchemy.exc.ProgrammingError:
-         return {'Message': "fields are empty"}
+         return {'Message': "fields are empty"}, 400
 
+    except InvalidEmailError:
+        return {'Message': "You sent an invalid email. Use this model: test@gmail.com"}, 406
 
+    except InvalidPasswordError:
+        return {'Message': "Password must contain from 6 to maximum 20 characters, at least one number, upper and lower case and one special character"}, 406
+    
 @jwt_required()
 def delete_profile():
     contractor = get_jwt_identity()
