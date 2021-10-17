@@ -1,6 +1,7 @@
 from dataclasses import asdict
 
 from app.configs.database import db
+from app.exceptions.job_exceptions import FieldCreateJobError
 from app.exceptions.users_exceptions import UserNotFoundError
 from app.models.contractor_model import ContractorModel
 from app.models.job_model import JobModel
@@ -25,8 +26,9 @@ def create_job():
 
         data['contractor_id'] = found_contractor.id
         
+        
         new_job = JobModel(**data)
-
+                
         db.session.add(new_job)
         
         db.session.commit()
@@ -44,10 +46,14 @@ def create_job():
     except UserNotFoundError as e:
         return {'message': str(e)}, 404
     
-    except sqlalchemy.exc.IntegrityError as e :
+    except sqlalchemy.exc.IntegrityError as e:
+        
         if type(e.orig) == psycopg2.errors.NotNullViolation:
-            return {'Message': str(e.orig).split('\n')[0]}, 402
+            return {'Message': 'Job must be created with name, description, price, difficulty_level and expiration_date'}, 406
     
+    except (TypeError, KeyError):
+        e = FieldCreateJobError()
+        return jsonify(e.message), 406
     
 def get_job_by_id(job_id: int):
     job = JobModel.query.filter_by(id=job_id).first()
