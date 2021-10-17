@@ -1,13 +1,60 @@
-from flask_jwt_extended import (create_access_token, get_jwt_identity, jwt_required)
+from dataclasses import asdict
+
+from app.configs.database import db
+from app.exceptions.job_exceptions import FieldCreateJobError
+from app.exceptions.users_exceptions import UserNotFoundError
+from app.models.contractor_model import ContractorModel
 from app.models.job_model import JobModel
-from app.models.contractor_model import ContractorModel
-from app.models.developer_model import DeveloperModel
-from flask import current_app, jsonify
-from app.models.contractor_model import ContractorModel
+from flask import current_app, jsonify, request
+from flask_jwt_extended import get_jwt_identity, jwt_required
+import sqlalchemy
+import psycopg2
+
 @jwt_required()
 def create_job():
-    ...
+    
+    try :
 
+        current_contractor = get_jwt_identity()
+        
+        found_contractor = ContractorModel.query.filter_by(email=current_contractor['email']).first()
+
+        if not found_contractor:
+            raise UserNotFoundError
+
+        data = request.json
+
+        data['contractor_id'] = found_contractor.id
+        
+        
+        new_job = JobModel(**data)
+                
+        db.session.add(new_job)
+        
+        db.session.commit()
+        
+        new_job.format_expiration_date()
+        
+        serialized_data = asdict(new_job)
+        
+        del serialized_data['contractor']
+        
+        del serialized_data['developer']
+        
+        return jsonify(serialized_data), 200
+    
+    except UserNotFoundError as e:
+        return {'message': str(e)}, 404
+    
+    except sqlalchemy.exc.IntegrityError as e:
+        
+        if type(e.orig) == psycopg2.errors.NotNullViolation:
+            return {'Message': 'Job must be created with name, description, price, difficulty_level and expiration_date'}, 406
+    
+    except (TypeError, KeyError):
+        e = FieldCreateJobError()
+        return jsonify(e.message), 406
+    
 def get_job_by_id(job_id: int):
     job = JobModel.query.filter_by(id=job_id).first()
     if job is None:
