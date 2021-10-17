@@ -89,7 +89,7 @@ def update_job_by_id(job_id: int):
             return jsonify({"message": "Only the contractor of this specific job can update it"}), 409
         if 'developer_id' in data:
             return jsonify({"name": job.name,  "description": job.description, "price": job.price, "difficulty_level": job.difficulty_level, "expiration_date": datetime.strftime(job.expiration_date, "%d/%m/%y %H:%M"), "progress": job.progress, "developer": [{"name": developer.name, "email": developer.email, "birthdate": datetime.strftime(developer.birthdate, "%d/%m/%y %H:%M")}]})
-        elif job.developer_id >= 1:
+        elif job.developer_id:
             developer = DeveloperModel.query.filter_by(id=job.developer_id).first()
             return jsonify({"name": job.name,  "description": job.description, "price": job.price, "difficulty_level": job.difficulty_level, "expiration_date": datetime.strftime(job.expiration_date, "%d/%m/%y %H:%M"), "progress": job.progress, "developer": [{"name": developer.name, "email": developer.email, "birthdate": datetime.strftime(developer.birthdate, "%d/%m/%y %H:%M")}]})
 
