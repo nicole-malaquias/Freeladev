@@ -20,16 +20,16 @@ def create_profile():
     try:
         data = request.json
         if not ContractorModel.verify_pattern_password(data['password']):
-            return "Password must contain from 6 to maximum 20 characters, at least one number, upper and lower case and one special character"
+            return "Password must contain from 6 to maximum 20 characters, at least one number, upper and lower case and one special character", 409
         if not ContractorModel.verify_pattern_email(data['email']):
-            return "Email must contain @ and ."
+            return "Email must contain @ and .", 409
         if ContractorModel.unique_email(data['email']):
-            return "You've already registered with this email as a contractor"
+            return "You've already registered with this email as a contractor", 409
         if "cnpj" in data:
             if ContractorModel.unique_cnpj(data['cnpj']):
-                return "You've already registered with this cnpj as a contractor"
+                return "You've already registered with this cnpj as a contractor", 409
             if not ContractorModel.verify_cnpj(data['cnpj']):
-                return "cnpj must be in this format: 00.000.000/0000-00"
+                return "cnpj must be in this format: 00.000.000/0000-00", 409
                 
         email_already_used_as_developer = DeveloperModel.query.filter_by(email=data['email']).first()
         if email_already_used_as_developer:
@@ -54,7 +54,7 @@ def create_profile():
 
     except (KeyError, TypeError):
         err = FieldCreateContractorError()
-        return jsonify(err.message)
+        return jsonify(err.message), 409
 
 @jwt_required()
 def get_profile_info():
