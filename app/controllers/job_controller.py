@@ -8,6 +8,7 @@ from app.models.developer_model import DeveloperModel
 from app.models.job_model import JobModel
 from flask import current_app, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
+from sqlalchemy import and_
 import sqlalchemy
 import psycopg2
 from sqlalchemy import exc
@@ -137,3 +138,22 @@ def get_all_jobs():
     jobs = session.query(JobModel)\
                   .all()
     return jsonify(jobs)
+
+
+def get_job_by_tech() :
+        
+    data = request.args
+    
+    if data :
+        
+        techs = data.getlist('tech')     
+        jobs = []
+        for tech in techs :
+            
+            query = JobModel.query.filter(and_(JobModel.description.like(f'%{tech}%'),JobModel.developer == None)).all()
+            jobs.append(query)
+            
+        return jsonify(jobs),200
+    
+    return jsonify([]),200
+    
