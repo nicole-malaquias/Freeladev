@@ -87,10 +87,10 @@ def get_job_by_id_authenticated(job_id: int):
         if found_developer:
             if job.developer_id == found_developer.id:
                 return jsonify(job)
-        return jsonify({"message": "Only the contractor that created this job or the developer assigned to it can see it's information."})
+        return jsonify({"message": "Only the contractor that created this job or the developer assigned to it can see it's information."}), 409
 
     except AttributeError:
-        return {"message": "This job does not exist"}
+        return {"message": "This job does not exist"}, 409
 
 @jwt_required()
 def update_job_by_id(job_id: int):
