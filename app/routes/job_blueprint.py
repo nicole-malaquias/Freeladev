@@ -3,7 +3,7 @@ from app.controllers.job_controller import get_job_by_tech ,create_job, update_j
 
 bp = Blueprint('bp_job', __name__, url_prefix='/job')
 
-bp.post('')(get_job_by_tech) 
+bp.get('')(get_job_by_tech) 
 
 bp.post('/create')(create_job)
 
