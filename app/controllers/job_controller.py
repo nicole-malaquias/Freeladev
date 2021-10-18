@@ -61,15 +61,11 @@ def create_job():
 
 
 def get_job_by_id(job_id: int):
+    job = JobModel.query.filter_by(id=job_id).first()
+    if job is None:
+        return {"message": "This job does not exist"}, 404
+    return jsonify(job)
 
-        job = JobModel.query.filter_by(id=job_id).first()
-        if job is None:
-            return {"message": "This job does not exist"}, 404
-        if job.developer_id:
-            return {"message": "This specific job already has a developer assigned to it."}
-           
-        else:
-            return jsonify(job)
 
 
 @jwt_required()
