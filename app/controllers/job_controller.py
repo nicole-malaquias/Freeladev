@@ -70,20 +70,6 @@ def get_job_by_id(job_id: int):
            
         else:
             return jsonify(job)
-@jwt_required
-def get_job_by_id_authenticated(job_id: int):
-    try:
-        user = get_jwt_identity()
-        job = JobModel.query.filter_by(id=job_id).first()
-
-
-    except Exception as e:
-        return str(e)
-
-
-
-
-
 
 
 @jwt_required()
