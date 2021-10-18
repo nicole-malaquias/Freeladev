@@ -150,7 +150,7 @@ def get_job_by_tech() :
         jobs = []
         for tech in techs :
             
-            query = JobModel.query.filter(and_(JobModel.description.like(f'%{tech}%'),JobModel.developer == None)).all()
+            query = JobModel.query.filter(and_(JobModel.description.ilike(f'%{tech}%'),JobModel.developer == None)).all()
             
             if len(query) > 0 :
                 
