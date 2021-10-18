@@ -154,9 +154,10 @@ def get_job_by_tech() :
             
             if len(query) > 0 :
              
-             [item.format_expiration_date() for item in query ]
+                new_arr = [{"name":item.name,"description":item.description,"price":item.price,"difficulty_level":item.difficulty_level, "expiration_date":datetime.strftime(item.expiration_date, "%d/%m/%y %H:%M"),"progress":item.progress,
+            "developer":item.developer,"contractor":item.contractor} for item in query ]
              
-             jobs.append(query)
+                jobs.append(new_arr)
             
         return jsonify(jobs),200
     
