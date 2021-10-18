@@ -6,6 +6,7 @@ from datetime import datetime
 from app.models.developer_model import DeveloperModel
 from app.models.contractor_model import ContractorModel
 
+
 @dataclass
 class JobModel(db.Model):
     name: str
@@ -35,5 +36,4 @@ class JobModel(db.Model):
     
     def format_expiration_date(self):
         self.expiration_date = datetime.strftime(self.expiration_date, "%d/%m/%y %H:%M")
-
 

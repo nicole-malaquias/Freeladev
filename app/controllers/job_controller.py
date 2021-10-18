@@ -7,8 +7,8 @@ from app.models.contractor_model import ContractorModel
 from app.models.developer_model import DeveloperModel
 from app.models.job_model import JobModel
 from flask import current_app, jsonify, request
-from flask_jwt_extended import get_jwt_identity, jwt_required
 import sqlalchemy
+from flask_jwt_extended import get_jwt_identity, jwt_required, verify_jwt_in_request
 import psycopg2
 from sqlalchemy import exc
 from datetime import datetime
@@ -58,12 +58,33 @@ def create_job():
     except (TypeError, KeyError):
         e = FieldCreateJobError()
         return jsonify(e.message), 406
-    
+
+
 def get_job_by_id(job_id: int):
-    job = JobModel.query.filter_by(id=job_id).first()
-    if job is None:
-        return {"message": "This job does not exist"}, 404
-    return jsonify(job)
+
+        job = JobModel.query.filter_by(id=job_id).first()
+        if job is None:
+            return {"message": "This job does not exist"}, 404
+        if job.developer_id:
+            return {"message": "This specific job already has a developer assigned to it."}
+           
+        else:
+            return jsonify(job)
+@jwt_required
+def get_job_by_id_authenticated(job_id: int):
+    try:
+        user = get_jwt_identity()
+        job = JobModel.query.filter_by(id=job_id).first()
+
+
+    except Exception as e:
+        return str(e)
+
+
+
+
+
+
 
 @jwt_required()
 def update_job_by_id(job_id: int):
