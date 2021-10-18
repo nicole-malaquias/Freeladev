@@ -1,4 +1,5 @@
-from http import HTTPStatus
+from dataclasses import asdict
+from datetime import datetime
 
 import psycopg2
 import sqlalchemy
@@ -6,65 +7,101 @@ from app.configs.database import db
 from app.exceptions.invalid_email_exceptions import InvalidEmailError
 from app.exceptions.invalid_field_create_developer_exceptions import \
     FieldCreateDeveloperError
+from app.exceptions.invalid_field_update_developer_exceptions import \
+    FieldUpdateDeveloperError
 from app.exceptions.invalid_password_exceptions import InvalidPasswordError
-from app.exceptions.invalid_field_create_developer_exceptions import FieldCreateDeveloperError
-from app.exceptions.invalid_field_update_developer_exceptions import FieldUpdateDeveloperError
-from app.models.developer_model import DeveloperModel
-from app.models.contractor_model import ContractorModel
+from app.exceptions.tech_exceptions import TechNotFoundError
 from app.exceptions.users_exceptions import UserNotFoundError
-import psycopg2
-import sqlalchemy
-from flask import jsonify, request, current_app
-from http import HTTPStatus
-from flask_jwt_extended import (create_access_token, get_jwt_identity,
-                                jwt_required)
-from datetime import datetime
+from app.models.contractor_model import ContractorModel
+from app.models.developer_model import DeveloperModel
+from app.models.developers_techs import DevelopersTechsModel
+from app.models.tech_model import TechModel
+from flask import current_app, jsonify, request
+from flask_jwt_extended import get_jwt_identity, jwt_required
+
 
 def create_profile():
 
     try:
 
         data = request.json
-
         email_already_used_as_contractor = ContractorModel.query.filter_by(email=data['email']).first()
+        
         if email_already_used_as_contractor:
-            return {'message': 'Email is already used as contractor, please use another one for your developer account.'}, 409
+            return {'Message': 'Email is already used as contractor, please use another one for your developer account.'}, 409
         
         verify_email = DeveloperModel.verify_pattern_email(data['email'])
+        
         if not verify_email:
             raise InvalidEmailError(data)
 
         verify_password = DeveloperModel.verify_pattern_password(data['password'])
+        
         if not verify_password:
             raise InvalidPasswordError(data)
-
+        
+        technologies = []
+        
+        if data.get('technologies'):
+            
+            technologies = data.pop('technologies')
+        
         password_input = data.pop('password')
-
+        
         new_dev = DeveloperModel(**data)
         new_dev.password = password_input
 
         db.session.add(new_dev)
         db.session.commit()
         
-        return jsonify(new_dev),HTTPStatus.CREATED
+        
+        new_dev.format_birthdate()
+        technologies_not_avaliable = []
+        avaliable_technologies = []
+        developer_techs = []
+        
+        for tech in technologies:
+            found_tech = TechModel.get_tech(tech['name'])
+            
+            if not found_tech:
+                technologies_not_avaliable.append(tech['name'])
+                
+            else:
+                developer_tech = DevelopersTechsModel(tech_id=found_tech.id, developer_id=new_dev.id)        
+                developer_techs.append(developer_tech)
+                
+                avaliable_technologies.append(tech['name'])
+                
+        for developer_tech in developer_techs:
+            DevelopersTechsModel.insert_developer_techs(developer_tech)
+
+        if technologies_not_avaliable:
+            raise TechNotFoundError(avaliable_technologies, technologies_not_avaliable)
+        
+        else:            
+            new_dev.format_birthdate()
+            return jsonify({**asdict(new_dev), 'technologies': [*avaliable_technologies]}), 201
  
-    except InvalidEmailError as err:
-        return jsonify(err.message)
+    except InvalidEmailError as e:
+        return jsonify(e.message), 406
 
-    except InvalidPasswordError as err:
-        return jsonify(err.message)
-
+    except InvalidPasswordError as e:
+        return jsonify(e.message), 406
+    
+    except TechNotFoundError as e:        
+        return jsonify({**asdict(new_dev), 'technologies': e.message}), 201
+    
     except (KeyError, TypeError):
-        err = FieldCreateDeveloperError()
-        return jsonify(err.message), 409
+        e = FieldCreateDeveloperError()
+        return jsonify(e.message), 406
     
     except sqlalchemy.exc.IntegrityError as e :
         
         if type(e.orig) == psycopg2.errors.NotNullViolation:
-            return {'Message': 'Developer must be created with name, email, password and birthdate'}, 400
+            return {'Message': 'Developer must be created with name, email, password and birthdate'}, 406
         
         if type(e.orig) ==  psycopg2.errors.UniqueViolation:
-            return {'Message': 'Please use another email'}, 400     
+            return {'Message': 'Please use another email'}, 409     
     
     
 @jwt_required()

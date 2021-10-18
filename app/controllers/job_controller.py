@@ -7,8 +7,8 @@ from app.models.contractor_model import ContractorModel
 from app.models.developer_model import DeveloperModel
 from app.models.job_model import JobModel
 from flask import current_app, jsonify, request
-from flask_jwt_extended import get_jwt_identity, jwt_required
 import sqlalchemy
+from flask_jwt_extended import get_jwt_identity, jwt_required, verify_jwt_in_request
 import psycopg2
 from sqlalchemy import exc
 from datetime import datetime
@@ -58,12 +58,40 @@ def create_job():
     except (TypeError, KeyError):
         e = FieldCreateJobError()
         return jsonify(e.message), 406
-    
+
+
 def get_job_by_id(job_id: int):
-    job = JobModel.query.filter_by(id=job_id).first()
-    if job is None:
+
+        job = JobModel.query.filter_by(id=job_id).first()
+        if job is None:
+            return {"message": "This job does not exist"}, 404
+        if job.developer_id:
+            return {"message": "This specific job already has a developer assigned to it."}, 403
+           
+        else:
+            return jsonify(job)
+
+
+
+@jwt_required()
+def get_job_by_id_authenticated(job_id: int):
+    try:
+        user = get_jwt_identity()
+        found_contractor = ContractorModel.query.filter_by(email=user['email']).first()
+        found_developer = DeveloperModel.query.filter_by(email=user['email']).first()
+
+        job = JobModel.query.filter_by(id=job_id).first()
+        job.format_expiration_date()
+        if found_contractor:
+            if job.contractor_id == found_contractor.id:
+                return jsonify(job)
+        if found_developer:
+            if job.developer_id == found_developer.id:
+                return jsonify(job)
+        return jsonify({"message": "Only the contractor that created this job or the developer assigned to it can see it's information."}), 403
+
+    except AttributeError:
         return {"message": "This job does not exist"}, 404
-    return jsonify(job)
 
 @jwt_required()
 def update_job_by_id(job_id: int):

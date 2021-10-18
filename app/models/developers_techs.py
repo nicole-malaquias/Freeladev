@@ -11,7 +11,6 @@ class DevelopersTechsModel(db.Model):
     developer_id = db.Column(db.Integer, db.ForeignKey('developers.id'))
     tech_id = db.Column(db.Integer, db.ForeignKey('techs.id'))
 
-
-
-
-
+    def insert_developer_techs(self):
+        db.session.add(self)
+        db.session.commit()
