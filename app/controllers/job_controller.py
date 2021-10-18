@@ -7,6 +7,8 @@ from app.models.contractor_model import ContractorModel
 from app.models.developer_model import DeveloperModel
 from app.models.job_model import JobModel
 from flask import current_app, jsonify, request
+from flask_jwt_extended import get_jwt_identity, jwt_required
+from sqlalchemy import and_
 import sqlalchemy
 from flask_jwt_extended import get_jwt_identity, jwt_required, verify_jwt_in_request
 import psycopg2
@@ -165,3 +167,28 @@ def get_all_jobs():
     jobs = session.query(JobModel)\
                   .all()
     return jsonify(jobs)
+
+
+def get_job_by_tech() :
+        
+    data = request.args
+    
+    if data :
+        
+        techs = data.getlist('tech')     
+        jobs = []
+        for tech in techs :
+            
+            query = JobModel.query.filter(and_(JobModel.description.ilike(f'%{tech}%'),JobModel.developer == None)).all()
+            
+            if len(query) > 0 :
+             
+                new_arr = [{"name":item.name,"description":item.description,"price":item.price,"difficulty_level":item.difficulty_level, "expiration_date":datetime.strftime(item.expiration_date, "%d/%m/%y %H:%M"),"progress":item.progress,
+            "developer":item.developer,"contractor":item.contractor} for item in query ]
+             
+                jobs.append(new_arr)
+            
+        return jsonify(jobs),200
+    
+    return jsonify([]),200
+    
