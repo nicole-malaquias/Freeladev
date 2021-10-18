@@ -60,3 +60,5 @@ class DeveloperModel(db.Model):
         
         return False 
                 
+    def format_birthdate(self):
+        self.birthdate = datetime.strftime(self.birthdate, "%d/%m/%y")
