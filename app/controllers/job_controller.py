@@ -66,7 +66,7 @@ def get_job_by_id(job_id: int):
         if job is None:
             return {"message": "This job does not exist"}, 404
         if job.developer_id:
-            return {"message": "This specific job already has a developer assigned to it."}
+            return {"message": "This specific job already has a developer assigned to it."}, 409
            
         else:
             return jsonify(job)
