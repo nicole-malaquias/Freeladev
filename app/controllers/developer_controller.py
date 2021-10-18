@@ -51,6 +51,8 @@ def create_profile():
         db.session.add(new_dev)
         db.session.commit()
         
+        
+        new_dev.format_birthdate()
         technologies_not_avaliable = []
         avaliable_technologies = []
         developer_techs = []
@@ -74,6 +76,7 @@ def create_profile():
             raise TechNotFoundError(avaliable_technologies, technologies_not_avaliable)
         
         else:            
+            new_dev.format_birthdate()
             return jsonify({**asdict(new_dev), 'technologies': [*avaliable_technologies]}), 201
  
     except InvalidEmailError as e:
@@ -82,8 +85,8 @@ def create_profile():
     except InvalidPasswordError as e:
         return jsonify(e.message), 406
     
-    except TechNotFoundError as e:
-        return jsonify(e.message), 201
+    except TechNotFoundError as e:        
+        return jsonify({**asdict(new_dev), 'technologies': e.message}), 201
     
     except (KeyError, TypeError):
         e = FieldCreateDeveloperError()

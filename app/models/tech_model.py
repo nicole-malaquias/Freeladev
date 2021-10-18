@@ -15,7 +15,7 @@ class TechModel(db.Model):
     
     @staticmethod
     def get_tech(tech_name):
-        found_tech = TechModel.query.filter_by(name=tech_name).first()
+        found_tech = TechModel.query.filter_by(name=tech_name.capitalize()).first()
         return found_tech
     
          
