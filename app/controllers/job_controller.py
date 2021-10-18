@@ -153,7 +153,9 @@ def get_job_by_tech() :
             query = JobModel.query.filter(and_(JobModel.description.ilike(f'%{tech}%'),JobModel.developer == None)).all()
             
             if len(query) > 0 :
-                
+             
+             [item.format_expiration_date() for item in query ]
+             
              jobs.append(query)
             
         return jsonify(jobs),200
