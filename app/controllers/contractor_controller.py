@@ -15,7 +15,7 @@ from flask import current_app, jsonify, request
 from flask_jwt_extended import (get_jwt_identity,
                                 jwt_required)
 from sqlalchemy import exc
-
+from datetime import datetime
 
 def create_profile():
     try:
@@ -199,3 +199,26 @@ def get_all_contractor_jobs():
 
     except UserNotFoundError as e:
         return {'message': str(e)}, 404
+
+@jwt_required()
+def get_contractor_jobs_by_progress_status():
+    current_contractor = get_jwt_identity()
+    found_contractor = ContractorModel.query.filter_by(email=current_contractor['email']).first()
+ 
+    data = request.args
+    jobs = []
+    if data:
+        query = JobModel.query.filter(JobModel.contractor_id == found_contractor.id, JobModel.progress == data['progress']). all()
+        if len(query) > 0 :
+           
+            new_arr = [{"name":item.name,"description":item.description,"price":item.price,"difficulty_level":item.difficulty_level, "expiration_date":datetime.strftime(item.expiration_date, "%d/%m/%y %H:%M"),"progress":item.progress,
+            "developer":item.developer,"contractor":item.contractor} for item in query ]
+             
+            jobs.append(new_arr)
+        return jsonify(jobs)
+    else:
+        return {"message": "The values for job progress are: null, ongoing and completed"}, 409
+
+
+        
+

@@ -165,3 +165,7 @@ def get_all_jobs():
     jobs = session.query(JobModel)\
                   .all()
     return jsonify(jobs)
+
+
+
+
