@@ -151,7 +151,10 @@ def get_job_by_tech() :
         for tech in techs :
             
             query = JobModel.query.filter(and_(JobModel.description.like(f'%{tech}%'),JobModel.developer == None)).all()
-            jobs.append(query)
+            
+            if len(query) > 0 :
+                
+             jobs.append(query)
             
         return jsonify(jobs),200
     
