@@ -70,15 +70,26 @@ def get_job_by_id(job_id: int):
            
         else:
             return jsonify(job)
-@jwt_required
+
+
+@jwt_required()
 def get_job_by_id_authenticated(job_id: int):
-    try:
+  
         user = get_jwt_identity()
+        found_contractor = ContractorModel.query.filter_by(email=user['email']).first()
+        found_developer = DeveloperModel.query.filter_by(email=user['email']).first()
+
         job = JobModel.query.filter_by(id=job_id).first()
+        job_expiration_date = datetime.strftime(job.expiration_date, "%d/%m/%y %H:%M")
+        if found_contractor:
+            if job.contractor_id == found_contractor.id:
+                return jsonify(job)
+        if found_developer:
+            if job.developer_id == found_developer.id:
+                return jsonify(job)
+        return jsonify({"message": "Only the contractor that created this job or the developer assigned to it can see it's information."})
 
 
-    except Exception as e:
-        return str(e)
 
 
 
