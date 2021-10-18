@@ -2,6 +2,7 @@ from app.configs.database import db
 from dataclasses import dataclass
 
 
+
 @dataclass
 class TechModel(db.Model):
     name: str
@@ -11,5 +12,10 @@ class TechModel(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
-
     
+    @staticmethod
+    def get_tech(tech_name):
+        found_tech = TechModel.query.filter_by(name=tech_name).first()
+        return found_tech
+    
+         
