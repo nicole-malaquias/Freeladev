@@ -221,7 +221,7 @@ def update_profile_info():
             tech = asdict(row[1])
             developer['technologies'] = [*developer['technologies'], tech]
             
-        developer['birthdate'] = datetime.strftime(developer['birthdate'], "%d/%m/%y")
+        developer['birthdate'] = datetime.strftime(developer['birthdate'], "%d/%m/%Y")
         
         if technologies_not_avaliable:
                 raise TechNotFoundError(avaliable_technologies, technologies_not_avaliable)
@@ -250,6 +250,8 @@ def update_profile_info():
         e = FieldUpdateDeveloperError()
         return jsonify(e.message), 406
     
+    except EmailAlreadyRegisteredError as e:
+        return {'message': str(e)}, 409
 @jwt_required()
 def delete_profile():
     current_developer = get_jwt_identity()

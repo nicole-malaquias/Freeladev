@@ -62,7 +62,7 @@ class DeveloperModel(db.Model):
 
     @staticmethod                
     def verify_birthdate_pattern(user_birthdate):
-        birthdate_pattern = "^(0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])[- /.](19|20)\d\d$"
+        birthdate_pattern = "^(0[1-9]|[12][0-9]|3[01])[- /.](0[1-9]|1[012])[- /.](19|20)\d\d$"
         
         if(re.search( birthdate_pattern, user_birthdate)):
             
@@ -71,4 +71,4 @@ class DeveloperModel(db.Model):
         return False 
                 
     def format_birthdate(self):
-        self.birthdate = datetime.strftime(self.birthdate, "%d/%m/%y")
+        self.birthdate = datetime.strftime(self.birthdate, "%d/%m/%Y")
