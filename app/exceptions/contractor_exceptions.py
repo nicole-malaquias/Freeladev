@@ -1,4 +1,4 @@
-from flask import jsonify, request
+from flask import request
 
 
 class FieldCreateContractorError(Exception):
@@ -14,4 +14,12 @@ class FieldCreateContractorError(Exception):
             "Wrong_keys_sended": [*problem]
             }
         }
+        super().__init__(self.message)
+        
+        
+class EmailAlreadyRegisteredError(Exception):
+    def __init__(self):
+        
+        self.message = 'Email is already used as contractor, please use another one for your developer account.'
+        
         super().__init__(self.message)
