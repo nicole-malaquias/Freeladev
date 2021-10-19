@@ -146,8 +146,10 @@ def update_profile_info():
         
         data = request.json
         
+        technologies_not_avaliable = []
+        avaliable_technologies = []
+        developer_techs = []
         
-
         if 'birthdate' in data.keys():
             
             if not DeveloperModel.verify_birthdate_pattern(data['birthdate']):
@@ -163,7 +165,7 @@ def update_profile_info():
             else: 
                 
                 if not DeveloperModel.verify_pattern_email(data['email']):
-                    raise InvalidEmailError(data)
+                    raise InvalidEmailError
                 
         current_developer = get_jwt_identity()
         
@@ -177,44 +179,54 @@ def update_profile_info():
             developer = DeveloperModel(password=data.pop('password'))
             
             data['password_hash'] = developer.password_hash
-        
+            
         if data.get('technologies'):
+            DevelopersTechsModel.delete_developer_techs(found_developer.id)
             
             technologies = data.pop('technologies')
             
-            technologies_not_avaliable = []
-            avaliable_technologies = []
-            developer_techs = []
-            
-            
-            
             for tech in technologies:
                 found_tech = TechModel.get_tech(tech['name'])
+                
+                if not found_tech:
+                    technologies_not_avaliable.append(tech['name'])
+                
+                else:                    
+                    developer_tech = DevelopersTechsModel(tech_id=found_tech.id, developer_id=found_developer.id)
+                                        
+                    developer_techs.append(developer_tech)
+                    
+                    avaliable_technologies.append(tech['name'])
+                
+                
+            for developer_tech in developer_techs:
+                DevelopersTechsModel.insert_developer_techs(developer_tech)
+                
+        if data:
+            DeveloperModel.query.filter_by(id=found_developer.id).update(data)
+                
+            db.session.commit()
+                    
+        rows = current_app.db.session.query(DeveloperModel, TechModel)\
+                            .filter(DeveloperModel.id==DevelopersTechsModel.developer_id)\
+                            .filter(TechModel.id==DevelopersTechsModel.tech_id)\
+                            .where(DeveloperModel.id==found_developer.id)\
+                            .all()
+                            
+        developer = {**asdict(rows[0][0]), 'technologies': []}
+        
+        
             
-            if not found_tech:
-                technologies_not_avaliable.append(tech['name'])
-                
-            else:
-                developer_tech = DevelopersTechsModel(tech_id=found_tech.id, developer_id=found_developer.id)        
-                developer_techs.append(developer_tech)
-                
-                avaliable_technologies.append(tech['name'])
-                
-        for developer_tech in developer_techs:
-            DevelopersTechsModel.insert_developer_techs(developer_tech)
-
+        for row in rows:
+            tech = asdict(row[1])
+            developer['technologies'] = [*developer['technologies'], tech]
+            
+        developer['birthdate'] = datetime.strftime(developer['birthdate'], "%d/%m/%y")
+        
         if technologies_not_avaliable:
-            raise TechNotFoundError(avaliable_technologies, technologies_not_avaliable)
-        
-        DeveloperModel.query.filter_by(id=found_developer.id).update(data)
+                raise TechNotFoundError(avaliable_technologies, technologies_not_avaliable)
             
-        db.session.commit()
-    
-        updated_data = asdict(DeveloperModel.query.get(found_developer.id))
-
-        updated_data['birthdate'] = datetime.strftime(updated_data['birthdate'], "%d/%m/%y")
-        
-        return jsonify(updated_data), 200
+        return jsonify(developer), 200
     
 
     except sqlalchemy.exc.IntegrityError as e:
@@ -222,16 +234,21 @@ def update_profile_info():
         if type(e.orig) ==  psycopg2.errors.UniqueViolation:
             return {'Message': 'Please use another email'}, 400   
 
-
-    except sqlalchemy.exc.ProgrammingError:
-        
-         return {'Message': "fields are empty"}, 409
-     
+    except sqlalchemy.exc.StatementError as e:
+        return {'message': 'You cannot send an empty list of the technologies'}, 400
+    
     except InvalidEmailError as e:
         return jsonify(e.__dict__), 406
     
     except InvalidFormatToBirthdateError as e:
         return jsonify(e.__dict__), 406
+    
+    except TechNotFoundError as e:
+        return jsonify({**developer, 'technologies': e.message}), 201
+    
+    except sqlalchemy.exc.InvalidRequestError as e:
+        e = FieldUpdateDeveloperError()
+        return jsonify(e.message), 406
     
 @jwt_required()
 def delete_profile():
