@@ -8,7 +8,7 @@ from app.models.developer_model import DeveloperModel
 from app.models.job_model import JobModel
 from flask import current_app, jsonify, request
 import sqlalchemy
-from flask_jwt_extended import get_jwt_identity, jwt_required, verify_jwt_in_request
+from flask_jwt_extended import get_jwt_identity, jwt_required
 import psycopg2
 from sqlalchemy import exc, and_
 from datetime import datetime
@@ -164,7 +164,6 @@ def get_all_jobs():
 
 @jwt_required()
 def get_job_by_status() :
-  
     data = request.args
    
     current_user = get_jwt_identity()
@@ -174,17 +173,24 @@ def get_job_by_status() :
  
     if 'status' in data :
         
-        status = data['status']  
-      
+        status = data['status'] 
+        page = 1 
+        per_page = 5 
+        
+        if 'per_page' in data and 'page' in data : 
+            
+            page = int(data['page'])
+            per_page = int(data['per_page'])
+            
         if status == 'None' :
             query = JobModel.query.filter(and_(
                                            JobModel.progress == None,
-                                           JobModel.developer_id == user.id)).all()
-           
+                                           JobModel.developer_id == user.id)).paginate(page,per_page).items
+         
         else :
             query = JobModel.query.filter(and_(
                                             JobModel.progress.ilike(f'%{status}%'),
-                                            JobModel.developer_id == user.id)).all()
+                                            JobModel.developer_id == user.id)).paginate(page,per_page).items
            
       
         if len(query) > 0 :
