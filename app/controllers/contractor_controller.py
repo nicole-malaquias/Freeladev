@@ -204,17 +204,26 @@ def get_all_contractor_jobs():
 def get_contractor_jobs_by_progress_status():
     current_contractor = get_jwt_identity()
     found_contractor = ContractorModel.query.filter_by(email=current_contractor['email']).first()
- 
     data = request.args
+    if not request.args.get('page') or not request.args.get('per_page') or not data['progress']:
+        return "Please insert progree, page and per_page query params"
+    page = int(request.args.get('page'))
+    per_page = int(request.args.get('per_page'))
+    
     jobs = []
     if data:
-        query = JobModel.query.filter(JobModel.contractor_id == found_contractor.id, JobModel.progress == data['progress']). all()
+        if data['progress'] == 'None':
+            query = JobModel.query.filter(JobModel.contractor_id == found_contractor.id, JobModel.progress == None).paginate(page=page, per_page=per_page, error_out=True).items
+
+        else:    
+            query = JobModel.query.filter(JobModel.contractor_id == found_contractor.id, JobModel.progress == data['progress']).paginate(page=page, per_page=per_page, error_out=True).items
         if len(query) > 0 :
            
             new_arr = [{"name":item.name,"description":item.description,"price":item.price,"difficulty_level":item.difficulty_level, "expiration_date":datetime.strftime(item.expiration_date, "%d/%m/%y %H:%M"),"progress":item.progress,
             "developer":item.developer,"contractor":item.contractor} for item in query ]
              
             jobs.append(new_arr)
+
         return jsonify(jobs)
     else:
         return {"message": "The values for job progress are: null, ongoing and completed"}, 409
