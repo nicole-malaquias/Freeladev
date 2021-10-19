@@ -2,15 +2,12 @@
 
 ​
 
-## <font size="6">Rotas</font>
+## <font size="6">Routes</font>
 
 ​
-
-# Listas
-
 ​
 
-### <font color="purple"> GET </font> Lista de Jobs
+### <font color="purple"> GET </font> List of jobs that don't have a developer assigned to it
 
 ​
 
@@ -18,32 +15,24 @@
 freeladev.com/api
 ```
 
-<font color="yellow"> _Retorno_ </font>
-​
-
 ```json
 {
   "name": "SpaceBlog",
-  "description": "um site sobre noticias do mundo espacial",
+  "description": "an website about astronomy",
   "price": 3000,
   "difficulty_level": "beginner",
   "expiration_date": "12/12/2021 23:59",
-  "progress": null,
-  "contractor": "Pedro Musk"
+  "contractor": {"name": "Thiago Almeida" "email": "thiagoi43@gmail.com", "cnpj": "12.193/0001-11"}
 }
 ```
 
-### <font color="purple"> GET </font> Lista de Developers
+### <font color="purple"> GET </font> List of developers
 
 ​
 
 ```json
 freeladev.com/api/developers
 ```
-
-​
-<font color="yellow"> _Retorno_ </font>
-​
 
 ```json
 {
@@ -55,7 +44,7 @@ freeladev.com/api/developers
 
 ​
 
-### <font color="purple"> GET </font> Lista de Contractors
+### <font color="purple"> GET </font> List of contractors
 
 ​
 
@@ -63,7 +52,6 @@ freeladev.com/api/developers
 freeladev.com/api/contractors
 ```
 
-<font color="yellow"> _Retorno_ </font>
 ​
 
 ```json
@@ -78,7 +66,7 @@ freeladev.com/api/contractors
 
 # Developer
 
-### <font color="gree"> POST </font> Login (Developer e Contractor)
+### <font color="gree"> POST </font> Login (Developer and Contractor)
 
 ​
 
@@ -86,18 +74,18 @@ freeladev.com/api/contractors
 freeladev.com/api/login
 ```
 
-<font color="caramel"> Body </font>
+<font color="caramel"> _Request_ </font>
 ​
 
 ```json
 {
-  "name": "Thiago Camargo",
+  "email": "tiago90@gmail.com",
   "password": "freela123"
 }
 ```
 
 ​
-<font color="yellow"> _Retorno_ </font>
+<font color="yellow"> _Response_ </font>
 ​
 
 ```json
@@ -108,7 +96,7 @@ freeladev.com/api/login
 
 ​
 
-### <font color="green"> POST </font> Signup do Developer
+### <font color="green"> POST </font> Developer's signup
 
 ​
 
@@ -116,7 +104,7 @@ freeladev.com/api/login
 freeladev.com/api/developer/signup
 ```
 
-<font color="caramel"> Body </font>
+<font color="caramel"> _Request_ </font>
 ​
 
 ```json
@@ -124,12 +112,12 @@ freeladev.com/api/developer/signup
   "name": "Thiago Camargo",
   "email": "thiago.camargo@mail.com",
   "birthdate": "07/07/1998",
-  "password": "tatuVerde"
+  "password": "Bipe2019*#"
 }
 ```
 
 ​
-<font color="yellow"> _Retorno_ </font>
+<font color="yellow"> _Response_ </font>
 ​
 
 ```json
@@ -140,7 +128,7 @@ freeladev.com/api/developer/signup
 }
 ```
 
-### <font color="purple"> GET </font> Informações do Developer
+### <font color="purple"> GET </font> Developer's information
 
 ​
 
@@ -148,7 +136,7 @@ freeladev.com/api/developer/signup
 freeladev.com/api/developer/profile
 ```
 
-<font color="yellow"> _Retorno_ </font>
+<font color="yellow"> _Response_ </font>
 ​
 
 ```json
@@ -161,7 +149,7 @@ freeladev.com/api/developer/profile
 
 ​
 
-### <font color="orange"> PATCH </font> Atualizar informações do Developer
+### <font color="orange"> PATCH </font> Update developer information
 
 ​
 
@@ -170,13 +158,12 @@ freeladev.com/api/developer/update
 ```
 
 ​
-Poderá conter
+Can contain:
 "<font color="lightblue">name</font>",
-"<font color="lightblue">email</font>" e
+"<font color="lightblue">email</font>" and/or
 "<font color="lightblue">birthdate</font>"
-​
-<font color="caramel"> Body </font>
-​
+
+<font color="caramel"> _Request_ </font>
 
 ```json
 {
@@ -185,7 +172,7 @@ Poderá conter
 ```
 
 ​
-<font color="yellow"> _Retorno_ </font>
+<font color="yellow"> _Response_ </font>
 ​
 
 ```json
@@ -206,7 +193,7 @@ Poderá conter
 freeladev.com/api/developer/delete
 ```
 
-<font color="yellow"> _Retorno_ </font>
+<font color="yellow"> _Response_ </font>
 ​
 
 ```json
@@ -215,11 +202,11 @@ NO CONTENT, 204
 
 ​
 
-# Contractor
+# Contractor routes
 
 ​
 
-### <font color="gree"> POST </font> Signup do Contractor
+### <font color="gree"> POST </font> Contractor's signup
 
 ​
 
@@ -228,7 +215,7 @@ freeladev.com/api/contractor/signup
 ```
 
 ​
-<font color="caramel"> Body </font>
+<font color="caramel"> Request </font>
 ​
 
 ```json
@@ -236,12 +223,12 @@ freeladev.com/api/contractor/signup
   "name": "Pedro Musk",
   "email": "pedro.space@mail.com",
   "cnpj": "123.456.789/0000-00",
-  "password": "Muskzin"
+  "password": "Bertyt2017*#"
 }
 ```
 
 ​
-<font color="yellow"> _Retorno_ </font>
+<font color="yellow"> _Response_ </font>
 ​
 
 ```json
@@ -252,7 +239,7 @@ freeladev.com/api/contractor/signup
 }
 ```
 
-### <font color="purple"> GET </font> Informações do Contractor
+### <font color="purple"> GET </font> Contractor's information
 
 ​
 
@@ -260,20 +247,20 @@ freeladev.com/api/contractor/signup
 freeladev.com/api/contractor/profile
 ```
 
-<font color="yellow"> _Retorno_ </font>
+<font color="yellow"> _Response_ </font>
 ​
 
 ```json
 {
   "name": "Pedro Musk",
   "email": "pedro.space@mail.com",
-  "cnpj": "123.456.789/0000-00"
+  "cnpj": "12.456.789/0000-00"
 }
 ```
 
 ​
 
-### <font color="orange"> PATCH </font> Atualizar informações do Contractor
+### <font color="orange"> PATCH </font> Update contractor's information
 
 ​
 
@@ -282,12 +269,12 @@ freeladev.com/api/contractor/update
 ```
 
 ​
-Body poderá conter
+Body json can contain:
 "<font color="lightblue">name</font>",
 "<font color="lightblue">email</font>" e
 "<font color="lightblue">cnpj</font>"
 ​\
-<font color="caramel"> Body </font>
+<font color="caramel"> _Request_ </font>
 ​
 
 ```json
@@ -297,7 +284,7 @@ Body poderá conter
 ```
 
 ​
-<font color="yellow"> _Retorno_ </font>
+<font color="yellow"> _Response_ </font>
 ​
 
 ```json
@@ -318,7 +305,7 @@ Body poderá conter
 freeladev.com/api/contractor/delete
 ```
 
-<font color="yellow"> _Retorno_ </font>
+<font color="yellow"> _Response_ </font>
 ​
 
 ```json
@@ -331,7 +318,7 @@ NO CONTENT, 204
 
 ​
 
-### <font color="gree"> POST </font> Criar um Job
+### <font color="gree"> POST </font> Create a job
 
 ​
 
@@ -340,13 +327,13 @@ freeladev.com/api/job/create
 ```
 
 ​
-<font color="caramel"> Body </font>
+<font color="caramel"> _Request_ </font>
 ​
 
 ```json
 {
   "name": "SpaceBlog",
-  "description": "um site sobre noticias do mundo espacial",
+  "description": "a website about astronomy",
   "price": 3000,
   "difficulty_level": "beginner",
   "expiration_date": "12/12/2021 23:59"
@@ -354,13 +341,13 @@ freeladev.com/api/job/create
 ```
 
 ​
-<font color="yellow"> _Retorno_ </font>
+<font color="yellow"> _Response_ </font>
 ​
 
 ```json
 {
     "name": "SpaceBlog",
-    "description": "um site sobre noticias do mundo espacial",
+    "description": "a website about astronomy",
     "price": 3000,
     "difficulty_level": "beginner",
     "expiration_date": "12/12/2021 23:59",
@@ -371,7 +358,7 @@ freeladev.com/api/job/create
 
 ​
 
-### <font color="purple"> GET </font> Informações do Job e ver seu Developer/Contractor
+### <font color="purple"> GET </font> Information about a specific job
 
 ​
 
@@ -379,13 +366,13 @@ freeladev.com/api/job/create
 freeladev.com/api/job/info/<job_id>
 ```
 
-<font color="yellow"> _Retorno_ </font>
+<font color="yellow"> _Response_ </font>
 ​
 
 ```json
 {
   "name": "SpaceBlog",
-  "description": "um site sobre noticias do mundo espacial",
+  "description": "a website about astronomy",
   "price": 3000,
   "difficulty_level": "beginner",
   "expiration_date": "12/12/2021 23:59",
@@ -393,28 +380,32 @@ freeladev.com/api/job/info/<job_id>
 }
 ```
 
-Caso for o Developer que estiver visualizando também terá
+If it's a developer using the route it'll also return:
 ​
 
 ```json
 {
-  "contractor": "Pedro Musk"
+  "contractor_name": "Thiago Camargo",
+  "contractor_email": "tiago54@gmail.com",
+  "contractor_cnpj": "47.812.481/0001-02 "
 }
 ```
 
 ​
-Caso for o Contractor que estiver visualizando também terá
+If it's a contractor using the route it'll also return if there's already a developer assigned to the job:
 ​
 
 ```json
 {
-  "developer": "Thiago Camargo"
+  "developer": "Thiago Camargo",
+  "developer_email": "tiago32@gmail.com",
+  "developer_birthday": "01/01/1998"
 }
 ```
 
 ​
 
-### <font color="orange"> PATCH </font> Atualizar o Job
+### <font color="orange"> PATCH </font> Update a job
 
 ​
 
@@ -422,43 +413,44 @@ Caso for o Contractor que estiver visualizando também terá
 freeladev.com/api/job/update/<job_id>
 ```
 
-Body poderá conter
+Body json can contain:
 "<font color="lightblue">name</font>",
 "<font color="lightblue">description</font>",
 "<font color="lightblue">price</font>",
-"<font color="lightblue">difficulty_level</font>",
-"<font color="lightblue">expiration_date</font>" e
-"<font color="lightblue">developer</font>"
+"<font color="lightblue">difficulty\*level</font>",
+"<font color="lightblue">expiration\*date</font>" e
+"<font color="lightblue">developer*email</font>"
 ​
-<font color="caramel"> Body </font>
+<font color="caramel"> \_Request* </font>
 ​
 
 ```json
 {
-  "developer": "Vitor Menezes"
+  "developer_email": "vi32@gmail.com"
 }
 ```
 
 ​
-<font color="yellow"> _Retorno_ </font>
+<font color="yellow"> _Response_ </font>
 ​
 
 ```json
 {
     "name": "SpaceBlog",
-    "description": "um site sobre noticias do mundo espacial",
+    "description": "a website about astronomy",
     "price": 3000,
     "difficulty_level": "beginner",
     "expiration_date": "12/12/2021 23:59",
     "progress": "ongoing",
-    "developer": "Vitor Menezes"
+    "developer": {"name": "Filipe Ramos", "email": "filipe43@gmail.com", "birthdate": "01/01/1998"}
 ​
 }
 ```
 
 ​
+​
 
-### <font color="red"> Delete </font> Deletar o Job
+### <font color="red"> Delete </font> Delete a job
 
 ​
 
@@ -467,7 +459,7 @@ freeladev.com/api/job/delete/<job_id>
 ```
 
 ​
-<font color="yellow"> _Retorno_ </font>
+<font color="yellow"> _Response_ </font>
 ​
 
 ```json
@@ -476,62 +468,7 @@ NO CONTENT, 204
 
 ​
 
-### <font color="purple"> GET </font> Trabalhos do Developer
-
-​
-
-```json
-freeladev.com/api/contractor/jobs
-```
-
-​
-<font color="yellow"> _Retorno_ </font>
-​
-
-```json
-[
-  {
-    "name": "FishWorld",
-    "description": "um site o mundo da pesca esportiva",
-    "price": 4000,
-    "difficulty_level": "beginner",
-    "expiration_date": "06/06/2021 23:59",
-    "progress": "completed",
-    "developer": "Thiago Camargo"
-  },
-  {
-    "name": "SpaceBlog",
-    "description": "um site sobre noticias do mundo espacial",
-    "price": 3000,
-    "difficulty_level": "beginner",
-    "expiration_date": "12/12/2021 23:59",
-    "progress": "ongoing",
-    "developer": "Thiago Camargo"
-  }
-]
-```
-
-​
-
-### <font color="red"> Delete </font> Deletar o Job
-
-​
-
-```json
-freeladev.com/api/job/delete/<job_id>
-```
-
-​
-<font color="yellow"> _Retorno_ </font>
-​
-
-```json
-NO CONTENT, 204
-```
-
-​
-
-### <font color="purple"> GET </font> Trabalhos do Developer
+### <font color="purple"> GET </font> Developer jobs
 
 ​
 
@@ -539,35 +476,35 @@ NO CONTENT, 204
 freeladev.com/api/developer/jobs
 ```
 
-<font color="yellow"> _Retorno_ </font>
+<font color="yellow"> _Response_ </font>
 ​
 
 ```json
 [
   {
     "name": "FishWorld",
-    "description": "um site com tudo sobre a pesca esportiva",
+    "description": "a website about fishing",
     "price": 4000,
     "difficulty_level": "begginer",
     "expiration_date": "06/06/2021 23:59",
     "progress": "completed",
-    "developer": "Thiago Camargo"
+    "contractor": {"name": "Thiago Almeida" "email": "thiagoi43@gmail.com", "cnpj": "12.193/0001-11"}
   },
   {
     "name": "SpaceBlog",
-    "description": "um site sobre noticias do mundo espacial",
+    "description": "a website about astronomy",
     "price": 3000,
     "difficulty_level": "beginner",
     "expiration_date": "12/12/2021 23:59",
     "progress": "ongoing",
-    "developer": "Thiago Camargo"
+    "contractor": {"name": "Thiago Almeida" "email": "thiagoi43@gmail.com", "cnpj": "12.193/0001-11"}
   }
 ]
 ```
 
 ​
 
-### <font color="purple"> GET </font> Trabalhos do Contractor
+### <font color="purple"> GET </font> Contractor jobs
 
 ​
 
@@ -575,28 +512,36 @@ freeladev.com/api/developer/jobs
 freeladev.com/api/contractor/jobs
 ```
 
-<font color="yellow"> _Retorno_ </font>
+<font color="yellow"> _Response_ </font>
 ​
 
 ```json
 [
   {
-    "name": "SpaceAtlas",
-    "description": "um site com o mapa do céu",
+    "name": "Developers hub",
+    "description": "a website about programming",
     "price": 15000,
     "difficulty_level": "advanced",
     "expiration_date": "08/08/2021 23:59",
     "progress": "completed",
-    "developer": "Filipe Ramos"
+    "developer": {
+      "name": "Filipe Ramos",
+      "email": "filipe43@gmail.com",
+      "birthdate": "01/01/1998"
+    }
   },
   {
     "name": "SpaceBlog",
-    "description": "um site sobre noticias do mundo espacial",
+    "description": "a website about astronomy",
     "price": 3000,
     "difficulty_level": "beginner",
     "expiration_date": "12/12/2021 23:59",
     "progress": "ongoing",
-    "developer": "Thiago Camargo"
+    "developer": {
+      "name": "Filipe Ramos",
+      "email": "filipe43@gmail.com",
+      "birthdate": "01/01/1998"
+    }
   }
 ]
 ```
