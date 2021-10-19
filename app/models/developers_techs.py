@@ -14,3 +14,8 @@ class DevelopersTechsModel(db.Model):
     def insert_developer_techs(self):
         db.session.add(self)
         db.session.commit()
+        
+    @staticmethod
+    def delete_developer_techs(developer_id: int):
+        DevelopersTechsModel.query.filter_by(developer_id=developer_id).delete()
+        db.session.commit()
