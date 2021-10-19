@@ -154,6 +154,8 @@ def update_profile_info():
             
             if not DeveloperModel.verify_birthdate_pattern(data['birthdate']):
                 raise InvalidFormatToBirthdateError
+            else : 
+                data['birthdate'] = datetime.strptime(data['birthdate'], "%d/%m/%Y")
 
         if 'email' in data.keys():
         
@@ -163,16 +165,7 @@ def update_profile_info():
                 raise EmailAlreadyRegisteredError
             
             else: 
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
+            
                 if not DeveloperModel.verify_pattern_email(data['email']):
                     raise InvalidEmailError
                 
@@ -261,6 +254,8 @@ def update_profile_info():
     
     except EmailAlreadyRegisteredError as e:
         return {'message': str(e)}, 409
+    
+    
 @jwt_required()
 def delete_profile():
     current_developer = get_jwt_identity()
