@@ -164,6 +164,15 @@ def update_profile_info():
             
             else: 
                 
+                
+                
+                
+                
+                
+                
+                
+                
+                
                 if not DeveloperModel.verify_pattern_email(data['email']):
                     raise InvalidEmailError
                 
