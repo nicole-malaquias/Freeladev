@@ -57,7 +57,6 @@ def create_profile():
         db.session.commit()
         
         
-        new_dev.format_birthdate()
         technologies_not_avaliable = []
         avaliable_technologies = []
         developer_techs = []
@@ -76,12 +75,13 @@ def create_profile():
                 
         for developer_tech in developer_techs:
             DevelopersTechsModel.insert_developer_techs(developer_tech)
+            
+        new_dev.format_birthdate()
 
         if technologies_not_avaliable:
             raise TechNotFoundError(avaliable_technologies, technologies_not_avaliable)
         
         else:            
-            new_dev.format_birthdate()
             return jsonify({**asdict(new_dev), 'technologies': [*avaliable_technologies]}), 201
  
     except InvalidEmailError as e:
@@ -214,9 +214,16 @@ def update_profile_info():
                             .filter(TechModel.id==DevelopersTechsModel.tech_id)\
                             .where(DeveloperModel.id==found_developer.id)\
                             .all()
-                            
-        developer = {**asdict(rows[0][0]), 'technologies': []}
-        
+         
+        if not rows:
+            
+            row = DeveloperModel.query.get(found_developer.id)
+            
+            developer = {**asdict(row), 'technologies': []}
+            
+        else: 
+            developer = {**asdict(rows[0][0]), 'technologies': []}
+            
         
             
         for row in rows:
