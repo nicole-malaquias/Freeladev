@@ -1,4 +1,5 @@
 import os
+
 from dotenv import load_dotenv
 from flask import Flask
 
@@ -9,3 +10,4 @@ def init_app(app: Flask):
   app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = bool(os.environ.get('SQLALCHEMY_TRACK_MODIFICATIONS'))
   app.config['JSON_SORT_KEYS'] = bool(os.environ.get('JSON_SORT_KEYS'))
   app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY')
+ 

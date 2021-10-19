@@ -18,6 +18,7 @@ from sqlalchemy import exc
 from datetime import datetime
 
 def create_profile():
+    
     try:
         data = request.json
         if not ContractorModel.verify_pattern_password(data['password']):
@@ -55,7 +56,7 @@ def create_profile():
 
     except (KeyError, TypeError):
         err = FieldCreateContractorError()
-        return jsonify(err.message), 409
+        return jsonify(err.message), 406
 
 @jwt_required()
 def get_profile_info():
