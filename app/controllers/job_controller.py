@@ -10,7 +10,7 @@ from flask import current_app, jsonify, request
 import sqlalchemy
 from flask_jwt_extended import get_jwt_identity, jwt_required, verify_jwt_in_request
 import psycopg2
-from sqlalchemy import exc
+from sqlalchemy import exc, and_
 from datetime import datetime
 
 
@@ -59,7 +59,6 @@ def create_job():
         e = FieldCreateJobError()
         return jsonify(e.message), 406
 
-
 def get_job_by_id(job_id: int):
 
         job = JobModel.query.filter_by(id=job_id).first()
@@ -70,8 +69,6 @@ def get_job_by_id(job_id: int):
            
         else:
             return jsonify(job)
-
-
 
 @jwt_required()
 def get_job_by_id_authenticated(job_id: int):
@@ -136,8 +133,7 @@ def update_job_by_id(job_id: int):
     
     except  sqlalchemy.exc.ProgrammingError:
         return {'message': "You need to send one of these keys to update a job: name, description, price, difficulty_level, expiration_date, progress and develope"}
-
-        
+       
 @jwt_required()
 def delete_job_by_id(job_id: int):
     
@@ -165,3 +161,38 @@ def get_all_jobs():
     jobs = session.query(JobModel)\
                   .all()
     return jsonify(jobs)
+
+@jwt_required()
+def get_job_by_status() :
+  
+    data = request.args
+   
+    current_user = get_jwt_identity()
+
+    user = DeveloperModel.query.filter(DeveloperModel.email == current_user['email']).all()[0]
+    
+ 
+    if 'status' in data :
+        
+        status = data['status']  
+      
+        if status == 'None' :
+            query = JobModel.query.filter(and_(
+                                           JobModel.progress == None,
+                                           JobModel.developer_id == user.id)).all()
+           
+        else :
+            query = JobModel.query.filter(and_(
+                                            JobModel.progress.ilike(f'%{status}%'),
+                                            JobModel.developer_id == user.id)).all()
+           
+      
+        if len(query) > 0 :
+            
+            new_arr = [{"name":item.name,"description":item.description,"price":item.price,"difficulty_level":item.difficulty_level, "expiration_date":datetime.strftime(item.expiration_date, "%d/%m/%y %H:%M"),"progress":item.progress,
+            "developer":item.developer,"contractor":item.contractor} for item in query ]
+            
+            return jsonify(new_arr),200
+
+    return jsonify([]),200
+    
