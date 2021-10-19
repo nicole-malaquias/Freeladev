@@ -11,7 +11,7 @@ class FieldCreateDeveloperError(Exception):
         self.message = {
             "Message": {
                  "available_fields": [
-                "name","email","password","birthdate",
+                "name","email","password","birthdate",'technologies'
                 ],
             "Wrong_keys_sended": [*problem]
             }
