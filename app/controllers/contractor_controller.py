@@ -55,7 +55,7 @@ def create_profile():
 
     except (KeyError, TypeError):
         err = FieldCreateContractorError()
-        return jsonify(err.message)
+        return jsonify(err.message), 406
 
 @jwt_required()
 def get_profile_info():
