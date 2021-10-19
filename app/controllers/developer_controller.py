@@ -4,6 +4,8 @@ from datetime import datetime
 import psycopg2
 import sqlalchemy
 from app.configs.database import db
+from app.exceptions.contractor_exceptions import EmailAlreadyRegisteredError
+from app.exceptions.developer_exceptions import InvalidFormatToBirthdateError
 from app.exceptions.invalid_email_exceptions import InvalidEmailError
 from app.exceptions.invalid_field_create_developer_exceptions import \
     FieldCreateDeveloperError
@@ -143,63 +145,94 @@ def update_profile_info():
     try:
         
         data = request.json
+        
+        
 
-        if not DeveloperModel.verify_pattern_email(data['email']):
-            return {"message": "Email must contain @ and ."}, 409
+        if 'birthdate' in data.keys():
+            
+            if not DeveloperModel.verify_birthdate_pattern(data['birthdate']):
+                raise InvalidFormatToBirthdateError
 
-        if not DeveloperModel.verify_birthdate_pattern(data['birthdate']):
-            return {"message": "Birthdate must be in this format: mm/dd/yyyy"}, 409
+        if 'email' in data.keys():
         
-        if 'email' in data :
-        
-            query = ContractorModel.query.filter(ContractorModel.email == data['email']).all()
+            found_email = ContractorModel.query.filter_by(email=data['email']).first()
             
-            if len(query)  > 0 :
-                return {'message': 'Email is already used as contractor, please use another one for your developer account.'}, 409
+            if found_email:
+                raise EmailAlreadyRegisteredError
             
-        current_user = get_jwt_identity()
-        user = DeveloperModel.query.filter(DeveloperModel.email == current_user['email']).one()
-        
-        if 'password' in data :
-            
-            if DeveloperModel.verify_pattern_password(data['password']) :
+            else: 
                 
-                user.password = data['password']
-                db.session.add(user)
-                db.session.commit()
-                del data['password']
+                if not DeveloperModel.verify_pattern_email(data['email']):
+                    raise InvalidEmailError(data)
+                
+        current_developer = get_jwt_identity()
+        
+        found_developer = DeveloperModel.query.filter_by(email=current_developer['email']).first()
+        
+        if 'password' in data.keys():
+            
+            if not ContractorModel.verify_pattern_password(data['password']):
+                raise InvalidPasswordError(data)
+            
+            developer = DeveloperModel(password=data.pop('password'))
+            
+            data['password_hash'] = developer.password_hash
+        
+        if data.get('technologies'):
+            
+            technologies = data.pop('technologies')
+            
+            technologies_not_avaliable = []
+            avaliable_technologies = []
+            developer_techs = []
+            
+            
+            
+            for tech in technologies:
+                found_tech = TechModel.get_tech(tech['name'])
+            
+            if not found_tech:
+                technologies_not_avaliable.append(tech['name'])
                 
             else:
-                return "Password must contain from 6 to maximum 20 characters, at least one number, upper and lower case and one special character", 409
+                developer_tech = DevelopersTechsModel(tech_id=found_tech.id, developer_id=found_developer.id)        
+                developer_techs.append(developer_tech)
+                
+                avaliable_technologies.append(tech['name'])
+                
+        for developer_tech in developer_techs:
+            DevelopersTechsModel.insert_developer_techs(developer_tech)
+
+        if technologies_not_avaliable:
+            raise TechNotFoundError(avaliable_technologies, technologies_not_avaliable)
+        
+        DeveloperModel.query.filter_by(id=found_developer.id).update(data)
             
-        if len(data) > 0 :
-            
-            user = DeveloperModel.query.filter(DeveloperModel.email == current_user['email']).update(data)
-            db.session.commit()
-            
-        user = DeveloperModel.query.filter(DeveloperModel.email == current_user['email']).one()   
-        user.birthdate = datetime.strftime(user.birthdate, "%d/%m/%y %H:%M")
-        return jsonify(user)
+        db.session.commit()
+    
+        updated_data = asdict(DeveloperModel.query.get(found_developer.id))
+
+        updated_data['birthdate'] = datetime.strftime(updated_data['birthdate'], "%d/%m/%y")
+        
+        return jsonify(updated_data), 200
     
 
-    except sqlalchemy.exc.IntegrityError as e :
-
-        if type(e.orig) == psycopg2.errors.NotNullViolation:
-            return {'Message': 'Developer must be created with name, email, password and birthdate'}, 400
-
+    except sqlalchemy.exc.IntegrityError as e:
+        
         if type(e.orig) ==  psycopg2.errors.UniqueViolation:
             return {'Message': 'Please use another email'}, 400   
 
 
-    except (FieldUpdateDeveloperError, sqlalchemy.exc.InvalidRequestError, KeyError):
-        
-        err = FieldUpdateDeveloperError()
-        return jsonify(err.message),409
-
     except sqlalchemy.exc.ProgrammingError:
         
          return {'Message': "fields are empty"}, 409
-
+     
+    except InvalidEmailError as e:
+        return jsonify(e.__dict__), 406
+    
+    except InvalidFormatToBirthdateError as e:
+        return jsonify(e.__dict__), 406
+    
 @jwt_required()
 def delete_profile():
     current_developer = get_jwt_identity()
