@@ -221,7 +221,7 @@ def get_contractor_jobs_by_progress_status():
                 formatted_job_list = [asdict(item) for item in query]
          
                 for d in formatted_job_list:
-                    d['expiration_date'] = datetime.strftime(d['expiration_date'], "%d/%m/%y %H:%M")
+                    del d['contractor']
                     if d.get('developer'):
                         d['developer']['birthdate'] = datetime.strftime(d['developer']['birthdate'] , "%d/%m/%y")
 
