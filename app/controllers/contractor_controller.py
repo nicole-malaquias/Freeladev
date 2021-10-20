@@ -152,6 +152,7 @@ def get_all_contractors():
 
 @jwt_required()
 def get_all_contractor_jobs():
+   
     current_contractor = get_jwt_identity()
     
     try:
