@@ -31,7 +31,7 @@ def create_job():
         data = request.json
 
         data['contractor_id'] = found_contractor.id
-        
+        data['progress'] = None
         
         new_job = JobModel(**data)
                 
