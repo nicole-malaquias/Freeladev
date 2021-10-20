@@ -120,11 +120,10 @@ def update_job_by_id(job_id: int):
                 return JobModel.update_job_if_developer_or_progress_is_null(job)
 
         elif job.developer_id:
-            developer = DeveloperModel.query.filter_by(id=job.developer_id).first()  
-            developer_birthdate = datetime.strftime(developer.birthdate, "%d/%m/%y %H:%M")          
-            return jsonify({"name": job.name,  "description": job.description, "price": job.price, "difficulty_level": job.difficulty_level, "expiration_date": job.expiration_date, "progress": job.progress, "developer": [{"name": developer.name, "email": developer.email, "birthdate": developer_birthdate}]})
+            return JobModel.update_job_if_developer_not_in_data(job, job_id, data)
+
         else:
-            JobModel.query.filter_by(id=job.id).update(data)                
+            JobModel.query.filter_by(id=job.id).update(data)     
             db.session.commit()
             return jsonify({"name": job.name,  "description": job.description, "price": job.price, "difficulty_level": job.difficulty_level, "expiration_date": job.expiration_date, "progress": job.progress})
             

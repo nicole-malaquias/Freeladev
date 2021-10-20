@@ -67,3 +67,9 @@ class JobModel(db.Model):
         return jsonify({"name": job.name,  "description": job.description, "price": job.price, "difficulty_level": job.difficulty_level, "expiration_date": job.format_expiration_date(), "progress": job.progress, "developer": [{"name": developer.name, "email": developer.email, "birthdate": developer_birthdate}]})
 
 
+    def update_job_if_developer_not_in_data(job, job_id, data):
+        JobModel.query.filter_by(id=job.id).update(data) 
+        db.session.commit()  
+        developer = DeveloperModel.query.filter_by(id=job.developer_id).first()  
+        developer_birthdate = datetime.strftime(developer.birthdate, "%d/%m/%y %H:%M")          
+        return jsonify({"name": job.name,  "description": job.description, "price": job.price, "difficulty_level": job.difficulty_level, "expiration_date": job.expiration_date, "progress": job.progress, "developer": [{"name": developer.name, "email": developer.email, "birthdate": developer_birthdate}]})
