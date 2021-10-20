@@ -18,6 +18,7 @@ from app.models.contractor_model import ContractorModel
 from app.models.developer_model import DeveloperModel
 from app.models.developers_techs import DevelopersTechsModel
 from app.models.tech_model import TechModel
+from app.models.job_model import JobModel
 from flask import current_app, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 
@@ -108,34 +109,34 @@ def create_profile():
     
 @jwt_required()
 def get_profile_info():
-    user = get_jwt_identity()
-    user["birthdate"] = user["birthdate"][6:16].split()
+    current_developer = get_jwt_identity()
+    
+    session = current_app.db.session
+    
+    rows = session.query(DeveloperModel, TechModel)\
+                             .filter(DeveloperModel.id==DevelopersTechsModel.developer_id)\
+                             .filter(TechModel.id==DevelopersTechsModel.tech_id)\
+                             .where(DeveloperModel.email==current_developer['email'])\
+                             .all()\
 
-    if int(user["birthdate"][0]) < 10:
-        user["birthdate"][0] = "0" + user["birthdate"][0]
+    techs = []
+    
+    if rows:
+        
+        for index in range(len(rows)):
+            techs.append(asdict(rows[index][1]))
+            
+        found_developer = {**asdict(rows[0][0]), 'technologies': [*techs]}
+        
+    else:
+        found_developer = DeveloperModel.query.filter_by(email=current_developer['email']).first()
+        
+        found_developer = {**asdict(found_developer), 'technologies': []}
+        
+    found_developer["birthdate"] = datetime.strftime(found_developer["birthdate"], "%d/%m/%Y")
+        
 
-    mounths = [
-        ("Jan", "01"),
-        ("Feb", "02"),
-        ("Mar", "03"),
-        ("Apr", "04"),
-        ("May", "05"),
-        ("Jun", "06"),
-        ("Jul", "07"),
-        ("Aug", "08"),
-        ("Sep", "09"),
-        ("Oct", "10"),
-        ("Nov", "11"),
-        ("Dec", "12"),
-    ]
-
-    for match in mounths:
-        if match[0] == user["birthdate"][1]:
-            user["birthdate"][1] = match[1]
-
-    user["birthdate"] = "/".join(user["birthdate"])
-
-    return user, 200
+    return jsonify(found_developer), 200
 
 
 
@@ -262,7 +263,6 @@ def update_profile_info():
     except EmailAlreadyRegisteredError as e:
         return {'message': str(e)}, 409
     
-    
 @jwt_required()
 def delete_profile():
     current_developer = get_jwt_identity()
@@ -281,6 +281,79 @@ def delete_profile():
     except UserNotFoundError as e:
         return {'message': str(e)}, 404
 
+
 def get_all_developers():
-    user_list = DeveloperModel.query.all()
-    return jsonify(user_list), 200
+    rows = current_app.db.session.query(DeveloperModel, TechModel)\
+                            .filter(DeveloperModel.id==DevelopersTechsModel.developer_id)\
+                            .filter(TechModel.id==DevelopersTechsModel.tech_id)\
+                            .all()
+                       
+    rows_with_devs_without_tech = current_app.db.session.query(DeveloperModel)\
+                            .all()
+    found_developers = []
+    
+    
+    
+    
+    for index in range(len(rows)):
+        
+        developer = asdict(rows[index][0])
+        
+        developer['birthdate'] = datetime.strftime(developer['birthdate'], '%d/%m/%Y')
+        
+        tech = asdict(rows[index][1])
+
+        if [found_developer for found_developer in found_developers if found_developer['email'] == developer['email']]:
+            
+            
+            for found_developer in found_developers:
+                
+                if found_developer['email'] == developer['email']:
+                    
+                    found_developer['technologies'] = [*found_developer['technologies'],
+                                                       { 'name': tech['name']}]
+                    
+        else:
+            serialized_data = {**developer, 'technologies': [tech]}
+    
+            found_developers.append(serialized_data)
+    
+    
+    for developer in rows_with_devs_without_tech:
+        
+        developer = asdict(developer)
+        
+        if not [found_developer for found_developer in found_developers if found_developer['email'] == developer['email']]:
+            
+            developer['birthdate'] = datetime.strftime(developer['birthdate'], '%d/%m/%Y')
+            
+            found_developers.append({**developer, 'technologies': []})
+    
+    return jsonify(found_developers), 200
+
+
+
+@jwt_required()
+def get_job_by_status() :
+    current_developer = get_jwt_identity()
+    found_developer = DeveloperModel.query.filter_by(email=current_developer['email']).first()
+    data = request.args
+    page = request.args.get('page', 1, int)
+    per_page = request.args.get('per_page', 1, int)
+    jobs = []
+    if data:
+        
+        if data['progress'] == 'None':
+            query = JobModel.query.filter(JobModel.developer_id == found_developer.id, JobModel.progress == None).paginate(page=page, per_page=per_page, error_out=True).items
+        else:
+            query = JobModel.query.filter(JobModel.developer_id == found_developer.id, JobModel.progress == data['progress']).paginate(page=page, per_page=per_page, error_out=True).items
+            if query:
+                formatted_job_list = [asdict(item) for item in query]
+                for d in formatted_job_list:
+                    d['expiration_date'] = datetime.strftime(d['expiration_date'], "%d/%m/%y %H:%M")
+                    if d.get('developer'):
+                        d['developer']['birthdate'] = datetime.strftime(d['developer']['birthdate'] , "%d/%m/%y")
+                jobs.append(formatted_job_list)
+        return jsonify(jobs)
+    else:
+        return {"message": "The values for job progress are: null, ongoing and completed"}, 406
