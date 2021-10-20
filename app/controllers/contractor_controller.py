@@ -226,7 +226,7 @@ def get_contractor_jobs_by_progress_status():
                 if d.get('developer'):
                     d['developer']['birthdate'] = datetime.strftime(d['developer']['birthdate'] , "%d/%m/%y")
 
-            jobs.append(formatted_job_list)
+            jobs.append(d)
 
 
         return jsonify(jobs)
