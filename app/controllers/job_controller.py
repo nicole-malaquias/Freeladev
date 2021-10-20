@@ -192,3 +192,7 @@ def get_job_by_tech() :
     
     return jsonify([]),200
     
+
+
+def get_price_difficulty_level():
+    ...
