@@ -289,7 +289,6 @@ def get_all_developers():
 
 @jwt_required()
 def get_job_by_status() :
-
     current_developer = get_jwt_identity()
     found_developer = DeveloperModel.query.filter_by(email=current_developer['email']).first()
     
