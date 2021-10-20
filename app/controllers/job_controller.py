@@ -31,7 +31,8 @@ def create_job():
         data = request.json
 
         data['contractor_id'] = found_contractor.id
-        
+        if 'progress' in data:
+            data['progress'] = None
         
         new_job = JobModel(**data)
                 
@@ -164,9 +165,12 @@ def delete_job_by_id(job_id: int):
 
 def get_all_jobs():
     session = current_app.db.session
+    
     jobs = session.query(JobModel)\
+                  .filter(JobModel.progress==None)\
                   .all()
-    return jsonify(jobs)
+
+    return jsonify(jobs), 200
 
 
 def get_job_by_tech() :
@@ -183,7 +187,7 @@ def get_job_by_tech() :
             
             if len(query) > 0 :
              
-                new_arr = [{"name":item.name,"description":item.description,"price":item.price,"difficulty_level":item.difficulty_level, "expiration_date":datetime.strftime(item.expiration_date, "%d/%m/%y %H:%M"),"progress":item.progress,
+                new_arr = [{"job_id": item.id, "name":item.name,"description":item.description,"price":item.price,"difficulty_level":item.difficulty_level, "expiration_date":datetime.strftime(item.expiration_date, "%d/%m/%y %H:%M"),"progress":item.progress,
             "developer":item.developer,"contractor":item.contractor} for item in query ]
              
                 jobs.append(new_arr)
