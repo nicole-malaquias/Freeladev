@@ -326,6 +326,6 @@ def get_all_developers():
             
             developer['birthdate'] = datetime.strftime(developer['birthdate'], '%d/%m/%Y')
             
-            found_developers.append(developer)
+            found_developers.append({**developer, 'technologies': []})
     
     return jsonify(found_developers), 200
