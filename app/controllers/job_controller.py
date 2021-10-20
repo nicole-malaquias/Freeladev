@@ -164,9 +164,12 @@ def delete_job_by_id(job_id: int):
 
 def get_all_jobs():
     session = current_app.db.session
+    
     jobs = session.query(JobModel)\
+                  .filter(JobModel.progress==None)\
                   .all()
-    return jsonify(jobs)
+
+    return jsonify(jobs), 200
 
 
 def get_job_by_tech() :
