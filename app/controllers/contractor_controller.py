@@ -15,7 +15,7 @@ from flask import current_app, jsonify, request
 from flask_jwt_extended import (get_jwt_identity,
                                 jwt_required)
 from sqlalchemy import exc
-
+from datetime import datetime
 
 def create_profile():
     
@@ -201,3 +201,51 @@ def get_all_contractor_jobs():
 
     except UserNotFoundError as e:
         return {'message': str(e)}, 404
+
+@jwt_required()
+def get_contractor_jobs_by_progress_status():
+    current_contractor = get_jwt_identity()
+    found_contractor = ContractorModel.query.filter_by(email=current_contractor['email']).first()
+    if found_contractor == None:
+        return {"message": "Contractor account not found"}, 404
+    data = request.args
+    page = request.args.get('page', 1, int)
+    per_page = request.args.get('per_page', 5, int)
+    jobs = []
+
+
+    if 'progress' not in data:
+        query = JobModel.query.filter(JobModel.contractor_id == found_contractor.id).paginate(page=page, per_page=per_page, error_out=True).items
+        formatted_job_list = [asdict(item) for item in query]
+        for d in formatted_job_list:
+            if d['developer']:
+                d['developer']['birthdate'] = datetime.strftime(d['developer']['birthdate'], "%d/%m/%y")
+            d['expiration_date'] = datetime.strftime(d['expiration_date'], "%d/%m/%y %H:%M")
+            del d['contractor']
+            jobs.append(d)
+        return jsonify(jobs)
+    elif 'progress' in data:
+        if data['progress'] == 'None':
+            query = JobModel.query.filter(JobModel.contractor_id == found_contractor.id, JobModel.progress == None).paginate(page=page, per_page=per_page, error_out=True).items
+        else:
+            query = JobModel.query.filter(JobModel.contractor_id == found_contractor.id, JobModel.progress == data['progress']).paginate(page=page, per_page=per_page, error_out=True).items
+        if query:
+            formatted_job_list = [asdict(item) for item in query]
+            
+            for d in formatted_job_list:
+                if d['developer']:
+                    d['developer']['birthdate'] = datetime.strftime(d['developer']['birthdate'], "%d/%m/%y")
+                d['expiration_date'] = datetime.strftime(d['expiration_date'], "%d/%m/%y %H:%M")
+                del d['contractor']
+                jobs.append(d)
+            
+        return jsonify(jobs)
+    else:
+        return {"message": "The values for job progress are:  None, ongoing and completed"}, 406
+
+
+
+
+
+        
+
