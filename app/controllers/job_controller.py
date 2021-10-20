@@ -186,7 +186,7 @@ def get_job_by_tech() :
             
             if len(query) > 0 :
              
-                new_arr = [{"name":item.name,"description":item.description,"price":item.price,"difficulty_level":item.difficulty_level, "expiration_date":datetime.strftime(item.expiration_date, "%d/%m/%y %H:%M"),"progress":item.progress,
+                new_arr = [{"job_id": item.id, "name":item.name,"description":item.description,"price":item.price,"difficulty_level":item.difficulty_level, "expiration_date":datetime.strftime(item.expiration_date, "%d/%m/%y %H:%M"),"progress":item.progress,
             "developer":item.developer,"contractor":item.contractor} for item in query ]
              
                 jobs.append(new_arr)
