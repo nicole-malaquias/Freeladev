@@ -15,4 +15,4 @@ bp.patch('/update/<int:job_id>')(update_job_by_id)
 
 bp.delete('/delete/<int:job_id>')(delete_job_by_id)
 
-bp.get('/info/xxx')(get_price_difficulty_level)
+bp.get('/info')(get_price_difficulty_level)
