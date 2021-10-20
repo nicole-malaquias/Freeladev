@@ -289,13 +289,27 @@ def get_all_developers():
 
 @jwt_required()
 def get_job_by_status() :
+
     current_developer = get_jwt_identity()
     found_developer = DeveloperModel.query.filter_by(email=current_developer['email']).first()
+    
+    if not found_developer:
+        return {"message": "You're not registered as a developer"}, 403
     data = request.args
     page = request.args.get('page', 1, int)
-    per_page = request.args.get('per_page', 1, int)
+    per_page = request.args.get('per_page', 5, int)
     jobs = []
-    if data:
+    if 'progress' not in data:
+        query = JobModel.query.filter(JobModel.developer_id == found_developer.id).paginate(page=page, per_page=per_page, error_out=True).items
+        
+        formatted_job_list = [asdict(item) for item in query]
+        for d in formatted_job_list:
+            d['expiration_date'] = datetime.strftime(d['expiration_date'], "%d/%m/%y %H:%M")
+            del d['developer']
+            jobs.append(d)
+        return jsonify(jobs)
+        
+    elif 'progress' in data:
         query = JobModel.query.filter(JobModel.developer_id == found_developer.id, JobModel.progress == data['progress']).paginate(page=page, per_page=per_page, error_out=True).items
         if query:
             formatted_job_list = [asdict(item) for item in query]
@@ -305,4 +319,4 @@ def get_job_by_status() :
             jobs.append(formatted_job_list)
         return jsonify(jobs)
     else:
-        return {"message": "The values for job progress are: null, ongoing and completed"}, 406
+        return {"message": "The values for job progress are:  ongoing or completed"}, 406
