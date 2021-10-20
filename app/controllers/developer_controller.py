@@ -262,7 +262,6 @@ def update_profile_info():
     except EmailAlreadyRegisteredError as e:
         return {'message': str(e)}, 409
     
-    
 @jwt_required()
 def delete_profile():
     current_developer = get_jwt_identity()
