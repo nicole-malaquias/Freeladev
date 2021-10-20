@@ -7,7 +7,7 @@ bp.post('/signup')(create_profile)
 
 bp.get('/profile')(get_profile_info)
 bp.get('')(get_all_developers)
-bp.get('/jobs/progress')(get_job_by_status)
+bp.get('/jobs')(get_job_by_status)
 bp.patch('/update')(update_profile_info)
 
 bp.delete('/delete')(delete_profile)
