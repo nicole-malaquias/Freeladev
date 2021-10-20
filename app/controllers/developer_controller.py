@@ -263,7 +263,6 @@ def update_profile_info():
     except EmailAlreadyRegisteredError as e:
         return {'message': str(e)}, 409
     
-    
 @jwt_required()
 def delete_profile():
     current_developer = get_jwt_identity()
@@ -283,8 +282,54 @@ def delete_profile():
         return {'message': str(e)}, 404
 
 def get_all_developers():
-    user_list = DeveloperModel.query.all()
-    return jsonify(user_list), 200
+    rows = current_app.db.session.query(DeveloperModel, TechModel)\
+                            .filter(DeveloperModel.id==DevelopersTechsModel.developer_id)\
+                            .filter(TechModel.id==DevelopersTechsModel.tech_id)\
+                            .all()
+                       
+    rows_with_devs_without_tech = current_app.db.session.query(DeveloperModel)\
+                            .all()
+    found_developers = []
+    
+    
+    
+    
+    for index in range(len(rows)):
+        
+        developer = asdict(rows[index][0])
+        
+        developer['birthdate'] = datetime.strftime(developer['birthdate'], '%d/%m/%Y')
+        
+        tech = asdict(rows[index][1])
+
+        if [found_developer for found_developer in found_developers if found_developer['email'] == developer['email']]:
+            
+            
+            for found_developer in found_developers:
+                
+                if found_developer['email'] == developer['email']:
+                    
+                    found_developer['technologies'] = [*found_developer['technologies'],
+                                                       { 'name': tech['name']}]
+                    
+        else:
+            serialized_data = {**developer, 'technologies': [tech]}
+    
+            found_developers.append(serialized_data)
+    
+    
+    for developer in rows_with_devs_without_tech:
+        
+        developer = asdict(developer)
+        
+        if not [found_developer for found_developer in found_developers if found_developer['email'] == developer['email']]:
+            
+            developer['birthdate'] = datetime.strftime(developer['birthdate'], '%d/%m/%Y')
+            
+            found_developers.append({**developer, 'technologies': []})
+    
+    return jsonify(found_developers), 200
+
 
 
 @jwt_required()

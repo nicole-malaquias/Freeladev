@@ -9,6 +9,7 @@ from app.models.contractor_model import ContractorModel
 
 @dataclass
 class JobModel(db.Model):
+    id: int
     name: str
     description: str
     price: float
