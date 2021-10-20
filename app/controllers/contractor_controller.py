@@ -211,21 +211,22 @@ def get_contractor_jobs_by_progress_status():
     jobs = []
     if data:
         if data['progress'] == 'None':
+           
             query = JobModel.query.filter(JobModel.contractor_id == found_contractor.id, JobModel.progress == None).paginate(page=page, per_page=per_page, error_out=True).items
-
+            
         else:    
             query = JobModel.query.filter(JobModel.contractor_id == found_contractor.id, JobModel.progress == data['progress']).paginate(page=page, per_page=per_page, error_out=True).items
             
-            if query:
-           
-                formatted_job_list = [asdict(item) for item in query]
-         
-                for d in formatted_job_list:
-                    del d['contractor']
-                    if d.get('developer'):
-                        d['developer']['birthdate'] = datetime.strftime(d['developer']['birthdate'] , "%d/%m/%y")
+        if query:
+    
+            formatted_job_list = [asdict(item) for item in query]
+    
+            for d in formatted_job_list:
+                del d['contractor']
+                if d.get('developer'):
+                    d['developer']['birthdate'] = datetime.strftime(d['developer']['birthdate'] , "%d/%m/%y")
 
-                jobs.append(formatted_job_list)
+            jobs.append(formatted_job_list)
 
 
         return jsonify(jobs)
