@@ -9,6 +9,7 @@ from flask import current_app, jsonify
 
 @dataclass
 class JobModel(db.Model):
+    id: int
     name: str
     description: str
     price: float

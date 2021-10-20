@@ -1,7 +1,8 @@
 from dataclasses import asdict
+from datetime import datetime
 
-from sqlalchemy.sql.elements import Null
-
+import psycopg2
+import sqlalchemy
 from app.configs.database import db
 from app.exceptions.job_exceptions import FieldCreateJobError
 from app.exceptions.users_exceptions import UserNotFoundError
@@ -10,12 +11,7 @@ from app.models.developer_model import DeveloperModel
 from app.models.job_model import JobModel
 from flask import current_app, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
-from sqlalchemy import and_
-import sqlalchemy
-from flask_jwt_extended import get_jwt_identity, jwt_required
-import psycopg2
-from sqlalchemy import exc, and_
-from datetime import datetime
+from sqlalchemy import and_, exc
 
 
 @jwt_required()
@@ -33,6 +29,8 @@ def create_job():
         data = request.json
 
         data['contractor_id'] = found_contractor.id
+        if 'progress' in data:
+            data['progress'] = None
         
         new_job = JobModel(**data)
                 
@@ -104,7 +102,7 @@ def update_job_by_id(job_id: int):
 
 
         if not job.contractor_id == found_contractor.id:
-            return jsonify({"message": "Only the contractor of this specific job can update it"}), 409
+            return jsonify({"message": "Only the contractor of this specific job can update it"}), 403
 
         if job is None:
             return {"message": "Job not found!"}, 404
@@ -134,7 +132,7 @@ def update_job_by_id(job_id: int):
         return {'message': 'Job must be created with name, description, price, difficulty_level and expiration_date'}, 406
     
     except  sqlalchemy.exc.ProgrammingError:
-        return {'message': "You need to send one of these keys to update a job: name, description, price, difficulty_level, expiration_date, progress and developer"}
+        return {'message': "You need to send one of these keys to update a job: name, description, price, difficulty_level, expiration_date, progress and developer"}, 409
   
 @jwt_required()
 def delete_job_by_id(job_id: int):
@@ -183,7 +181,7 @@ def get_job_by_tech() :
             
             if len(query) > 0 :
              
-                new_arr = [{"name":item.name,"description":item.description,"price":item.price,"difficulty_level":item.difficulty_level, "expiration_date":datetime.strftime(item.expiration_date, "%d/%m/%y %H:%M"),"progress":item.progress,
+                new_arr = [{"job_id": item.id, "name":item.name,"description":item.description,"price":item.price,"difficulty_level":item.difficulty_level, "expiration_date":datetime.strftime(item.expiration_date, "%d/%m/%y %H:%M"),"progress":item.progress,
             "developer":item.developer,"contractor":item.contractor} for item in query ]
              
                 jobs.append(new_arr)
