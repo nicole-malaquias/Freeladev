@@ -205,6 +205,8 @@ def get_all_contractor_jobs():
 def get_contractor_jobs_by_progress_status():
     current_contractor = get_jwt_identity()
     found_contractor = ContractorModel.query.filter_by(email=current_contractor['email']).first()
+    if found_contractor == None:
+        return {"message": "Contractor account not found"}, 404
     data = request.args
     page = request.args.get('page', 1, int)
     per_page = request.args.get('per_page', 5, int)
@@ -215,6 +217,8 @@ def get_contractor_jobs_by_progress_status():
         query = JobModel.query.filter(JobModel.contractor_id == found_contractor.id).paginate(page=page, per_page=per_page, error_out=True).items
         formatted_job_list = [asdict(item) for item in query]
         for d in formatted_job_list:
+            if d['developer']:
+                d['developer']['birthdate'] = datetime.strftime(d['developer']['birthdate'], "%d/%m/%y")
             d['expiration_date'] = datetime.strftime(d['expiration_date'], "%d/%m/%y %H:%M")
             del d['contractor']
             jobs.append(d)
@@ -226,13 +230,17 @@ def get_contractor_jobs_by_progress_status():
             query = JobModel.query.filter(JobModel.contractor_id == found_contractor.id, JobModel.progress == data['progress']).paginate(page=page, per_page=per_page, error_out=True).items
         if query:
             formatted_job_list = [asdict(item) for item in query]
+            
             for d in formatted_job_list:
+                if d['developer']:
+                    d['developer']['birthdate'] = datetime.strftime(d['developer']['birthdate'], "%d/%m/%y")
                 d['expiration_date'] = datetime.strftime(d['expiration_date'], "%d/%m/%y %H:%M")
                 del d['contractor']
-            jobs.append(formatted_job_list)
+                jobs.append(d)
+            
         return jsonify(jobs)
     else:
-        return {"message": "The values for job progress are:  None, ongoing or completed"}, 406
+        return {"message": "The values for job progress are:  None, ongoing and completed"}, 406
 
 
 
