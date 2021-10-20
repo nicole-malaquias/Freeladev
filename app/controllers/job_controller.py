@@ -137,7 +137,7 @@ def update_job_by_id(job_id: int):
         return {'message': 'Job must be created with name, description, price, difficulty_level and expiration_date'}, 406
     
     except  sqlalchemy.exc.ProgrammingError:
-        return {'message': "You need to send one of these keys to update a job: name, description, price, difficulty_level, expiration_date, progress and develope"}
+        return {'message': "You need to send one of these keys to update a job: name, description, price, difficulty_level, expiration_date, progress and develope"}, 409
 
         
 @jwt_required()
