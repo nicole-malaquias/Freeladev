@@ -31,7 +31,8 @@ def create_job():
             raise UserNotFoundError
 
         data = request.json
-
+        if 'progress' in data:
+            data['progress'] = None
         data['contractor_id'] = found_contractor.id
         
         new_job = JobModel(**data)
@@ -61,6 +62,7 @@ def create_job():
     except (TypeError, KeyError):
         e = FieldCreateJobError()
         return jsonify(e.message), 406
+
 
 def get_job_by_id(job_id: int):
 
