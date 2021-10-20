@@ -8,6 +8,7 @@ bp.get('')(get_job_by_tech)
 bp.post('/create')(create_job)
 
 bp.get('/info/<int:job_id>')(get_job_by_id)
+
 bp.get('/info/aut/<int:job_id>')(get_job_by_id_authenticated)
 
 bp.patch('/update/<int:job_id>')(update_job_by_id)

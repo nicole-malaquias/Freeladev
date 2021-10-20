@@ -18,6 +18,7 @@ from app.models.contractor_model import ContractorModel
 from app.models.developer_model import DeveloperModel
 from app.models.developers_techs import DevelopersTechsModel
 from app.models.tech_model import TechModel
+from app.models.job_model import JobModel
 from flask import current_app, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 
@@ -280,6 +281,7 @@ def delete_profile():
     except UserNotFoundError as e:
         return {'message': str(e)}, 404
 
+
 def get_all_developers():
     rows = current_app.db.session.query(DeveloperModel, TechModel)\
                             .filter(DeveloperModel.id==DevelopersTechsModel.developer_id)\
@@ -328,3 +330,30 @@ def get_all_developers():
             found_developers.append({**developer, 'technologies': []})
     
     return jsonify(found_developers), 200
+
+
+
+@jwt_required()
+def get_job_by_status() :
+    current_developer = get_jwt_identity()
+    found_developer = DeveloperModel.query.filter_by(email=current_developer['email']).first()
+    data = request.args
+    page = request.args.get('page', 1, int)
+    per_page = request.args.get('per_page', 1, int)
+    jobs = []
+    if data:
+        
+        if data['progress'] == 'None':
+            query = JobModel.query.filter(JobModel.developer_id == found_developer.id, JobModel.progress == None).paginate(page=page, per_page=per_page, error_out=True).items
+        else:
+            query = JobModel.query.filter(JobModel.developer_id == found_developer.id, JobModel.progress == data['progress']).paginate(page=page, per_page=per_page, error_out=True).items
+            if query:
+                formatted_job_list = [asdict(item) for item in query]
+                for d in formatted_job_list:
+                    d['expiration_date'] = datetime.strftime(d['expiration_date'], "%d/%m/%y %H:%M")
+                    if d.get('developer'):
+                        d['developer']['birthdate'] = datetime.strftime(d['developer']['birthdate'] , "%d/%m/%y")
+                jobs.append(formatted_job_list)
+        return jsonify(jobs)
+    else:
+        return {"message": "The values for job progress are: null, ongoing and completed"}, 406
