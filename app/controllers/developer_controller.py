@@ -296,18 +296,13 @@ def get_job_by_status() :
     per_page = request.args.get('per_page', 1, int)
     jobs = []
     if data:
-        
-        if data['progress'] == 'None':
-            query = JobModel.query.filter(JobModel.developer_id == found_developer.id, JobModel.progress == None).paginate(page=page, per_page=per_page, error_out=True).items
-        else:
-            query = JobModel.query.filter(JobModel.developer_id == found_developer.id, JobModel.progress == data['progress']).paginate(page=page, per_page=per_page, error_out=True).items
-            if query:
-                formatted_job_list = [asdict(item) for item in query]
-                for d in formatted_job_list:
-                    d['expiration_date'] = datetime.strftime(d['expiration_date'], "%d/%m/%y %H:%M")
-                    if d.get('developer'):
-                        d['developer']['birthdate'] = datetime.strftime(d['developer']['birthdate'] , "%d/%m/%y")
-                jobs.append(formatted_job_list)
+        query = JobModel.query.filter(JobModel.developer_id == found_developer.id, JobModel.progress == data['progress']).paginate(page=page, per_page=per_page, error_out=True).items
+        if query:
+            formatted_job_list = [asdict(item) for item in query]
+            for d in formatted_job_list:
+                d['expiration_date'] = datetime.strftime(d['expiration_date'], "%d/%m/%y %H:%M")
+                del d['developer']
+            jobs.append(formatted_job_list)
         return jsonify(jobs)
     else:
         return {"message": "The values for job progress are: null, ongoing and completed"}, 406
