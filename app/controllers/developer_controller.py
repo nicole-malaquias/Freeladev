@@ -108,34 +108,34 @@ def create_profile():
     
 @jwt_required()
 def get_profile_info():
-    user = get_jwt_identity()
-    user["birthdate"] = user["birthdate"][6:16].split()
+    current_developer = get_jwt_identity()
+    
+    session = current_app.db.session
+    
+    rows = session.query(DeveloperModel, TechModel)\
+                             .filter(DeveloperModel.id==DevelopersTechsModel.developer_id)\
+                             .filter(TechModel.id==DevelopersTechsModel.tech_id)\
+                             .where(DeveloperModel.email==current_developer['email'])\
+                             .all()\
 
-    if int(user["birthdate"][0]) < 10:
-        user["birthdate"][0] = "0" + user["birthdate"][0]
+    techs = []
+    
+    if rows:
+        
+        for index in range(len(rows)):
+            techs.append(asdict(rows[index][1]))
+            
+        found_developer = {**asdict(rows[0][0]), 'technologies': [*techs]}
+        
+    else:
+        found_developer = DeveloperModel.query.filter_by(email=current_developer['email']).first()
+        
+        found_developer = {**asdict(found_developer), 'technologies': []}
+        
+    found_developer["birthdate"] = datetime.strftime(found_developer["birthdate"], "%d/%m/%Y")
+        
 
-    mounths = [
-        ("Jan", "01"),
-        ("Feb", "02"),
-        ("Mar", "03"),
-        ("Apr", "04"),
-        ("May", "05"),
-        ("Jun", "06"),
-        ("Jul", "07"),
-        ("Aug", "08"),
-        ("Sep", "09"),
-        ("Oct", "10"),
-        ("Nov", "11"),
-        ("Dec", "12"),
-    ]
-
-    for match in mounths:
-        if match[0] == user["birthdate"][1]:
-            user["birthdate"][1] = match[1]
-
-    user["birthdate"] = "/".join(user["birthdate"])
-
-    return user, 200
+    return jsonify(found_developer), 200
 
 
 
@@ -284,3 +284,4 @@ def delete_profile():
 def get_all_developers():
     user_list = DeveloperModel.query.all()
     return jsonify(user_list), 200
+
