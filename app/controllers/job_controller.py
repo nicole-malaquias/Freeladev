@@ -122,11 +122,11 @@ def update_job_by_id(job_id: int):
         elif job.developer_id:
             return JobModel.update_job_if_developer_not_in_data(job, job_id, data)
 
-        else:
-            JobModel.query.filter_by(id=job.id).update(data)     
-            db.session.commit()
-            return jsonify({"name": job.name,  "description": job.description, "price": job.price, "difficulty_level": job.difficulty_level, "expiration_date": job.expiration_date, "progress": job.progress})
-            
+        
+        JobModel.query.filter_by(id=job.id).update(data)     
+        db.session.commit()
+        return jsonify({"name": job.name,  "description": job.description, "price": job.price, "difficulty_level": job.difficulty_level, "expiration_date": job.expiration_date, "progress": job.progress})
+        
     except exc.InvalidRequestError as e: 
         return {"message": "The available keys for job update are: name, description, price, difficulty_level, expiration_date, progress and developer"}, 409
 
