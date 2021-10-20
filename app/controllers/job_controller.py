@@ -202,11 +202,12 @@ def get_price_difficulty_level():
         
         if 'price' in data and 'difficulty' in data:
 
-            query = JobModel.query.filter(and_(JobModel.price == int(data['price']) , JobModel.difficulty_level.ilike(data['difficulty'] ))).all()
+            query = JobModel.query.filter(and_(JobModel.price >= int(data['price']) , JobModel.difficulty_level.ilike(data['difficulty'] ))).all()
             return jsonify(query),200 
 
         if 'price' in data and not 'difficulty' in data :
-            query = JobModel.query.filter(JobModel.price == int(data['price'])).all()
+            print('oi')
+            query = JobModel.query.filter(JobModel.price >= int(data['price'])).all()
             return jsonify(query),200 
         
         else :
