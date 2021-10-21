@@ -7,7 +7,6 @@ from app.exceptions.contractor_exceptions import FieldCreateContractorError
 from app.exceptions.field_upgrade_exeptions import FieldUpdateContractorError
 from app.exceptions.invalid_email_exceptions import InvalidEmailError
 from app.exceptions.invalid_password_exceptions import InvalidPasswordError
-from app.exceptions.users_exceptions import UserNotFoundError
 from app.models.contractor_model import ContractorModel
 from app.models.developer_model import DeveloperModel
 from app.models.job_model import JobModel
@@ -22,16 +21,16 @@ def create_profile():
     try:
         data = request.json
         if not ContractorModel.verify_pattern_password(data['password']):
-            return "Password must contain from 6 to maximum 20 characters, at least one number, upper and lower case and one special character", 409
+            return {"message": "Password must contain from 6 to maximum 20 characters, at least one number, upper and lower case and one special character"}, 406
         if not ContractorModel.verify_pattern_email(data['email']):
-            return "Email must contain @ and .", 409
+            return {"message": "Email must contain @ and ."}, 406
         if ContractorModel.unique_email(data['email']):
-            return "You've already registered with this email as a contractor.", 409
+            return {"message": "You've already registered with this email as a contractor."}, 406
         if "cnpj" in data:
             if ContractorModel.unique_cnpj(data['cnpj']):
-                return "You've already registered with this CNPJ as a contractor.", 409
+                return {"message": "You've already registered with this CNPJ as a contractor."}, 406
             if not ContractorModel.verify_cnpj(data['cnpj']):
-                return "cnpj must be in this format: 00.000.000/0000-00.", 409
+                return {"message": "cnpj must be in this format: 00.000.000/0000-00."}, 406
                 
         email_already_used_as_developer = DeveloperModel.query.filter_by(email=data['email']).first()
         if email_already_used_as_developer:
@@ -48,7 +47,7 @@ def create_profile():
     
     except sqlalchemy.exc.IntegrityError as e :
         if type(e.orig) == psycopg2.errors.NotNullViolation:
-            return {'Message': 'contractor must be created with name, email and password, CNPJ is optional.'}, 400
+            return {'message': 'contractor must be created with name, email and password, CNPJ is optional.'}, 400
         
     except exc.IntegrityError as e:
         if type(e.orig) == psycopg2.errors.UniqueViolation:  
