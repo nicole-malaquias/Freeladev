@@ -8,12 +8,13 @@ bp.post('/signup')(create_profile)
 bp.get('/profile')(get_profile_info)
 
 bp.get('')(get_all_contractors)
-
 bp.get('/jobs')(get_all_contractor_jobs)
 
 bp.patch('/update')(update_profile_info)
 
 bp.delete('/delete')(delete_profile)
+
+
 
 
 

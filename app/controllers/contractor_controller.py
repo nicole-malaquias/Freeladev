@@ -7,7 +7,6 @@ from app.exceptions.contractor_exceptions import FieldCreateContractorError
 from app.exceptions.field_upgrade_exeptions import FieldUpdateContractorError
 from app.exceptions.invalid_email_exceptions import InvalidEmailError
 from app.exceptions.invalid_password_exceptions import InvalidPasswordError
-from app.exceptions.users_exceptions import UserNotFoundError
 from app.models.contractor_model import ContractorModel
 from app.models.developer_model import DeveloperModel
 from app.models.job_model import JobModel
@@ -15,23 +14,23 @@ from flask import current_app, jsonify, request
 from flask_jwt_extended import (get_jwt_identity,
                                 jwt_required)
 from sqlalchemy import exc
-
+from datetime import datetime
 
 def create_profile():
     
     try:
         data = request.json
         if not ContractorModel.verify_pattern_password(data['password']):
-            return "Password must contain from 6 to maximum 20 characters, at least one number, upper and lower case and one special character", 409
+            return {"message": "Password must contain from 6 to maximum 20 characters, at least one number, upper and lower case and one special character"}, 406
         if not ContractorModel.verify_pattern_email(data['email']):
-            return "Email must contain @ and .", 409
+            return {"message": "Email must contain @ and ."}, 406
         if ContractorModel.unique_email(data['email']):
-            return "You've already registered with this email as a contractor.", 409
+            return {"message": "You've already registered with this email as a contractor."}, 406
         if "cnpj" in data:
             if ContractorModel.unique_cnpj(data['cnpj']):
-                return "You've already registered with this CNPJ as a contractor.", 409
+                return {"message": "You've already registered with this CNPJ as a contractor."}, 406
             if not ContractorModel.verify_cnpj(data['cnpj']):
-                return "cnpj must be in this format: 00.000.000/0000-00.", 409
+                return {"message": "cnpj must be in this format: 00.000.000/0000-00."}, 406
                 
         email_already_used_as_developer = DeveloperModel.query.filter_by(email=data['email']).first()
         if email_already_used_as_developer:
@@ -48,7 +47,7 @@ def create_profile():
     
     except sqlalchemy.exc.IntegrityError as e :
         if type(e.orig) == psycopg2.errors.NotNullViolation:
-            return {'Message': 'contractor must be created with name, email and password, CNPJ is optional.'}, 400
+            return {'message': 'contractor must be created with name, email and password, CNPJ is optional.'}, 400
         
     except exc.IntegrityError as e:
         if type(e.orig) == psycopg2.errors.UniqueViolation:  
@@ -150,53 +149,51 @@ def get_all_contractors():
                   .all()
     return jsonify(contractors)
 
+
 @jwt_required()
 def get_all_contractor_jobs():
     current_contractor = get_jwt_identity()
-    
-    try:
-        
-        found_contractor = ContractorModel.query.filter_by(email=current_contractor['email']).first()
-        
-        if not found_contractor:
-            raise UserNotFoundError
-        session = current_app.db.session
-        
-        base_query =  session.query(JobModel)\
-                    .filter(JobModel.contractor_id==found_contractor.id)
-                    
-        jobs_with_dev = base_query\
-                    .filter(DeveloperModel.id==JobModel.developer_id)\
-                    .filter(JobModel.progress!=None)\
-                    .all()
-                    
-        jobs_with_no_progress = base_query\
-                    .filter(JobModel.progress==None)\
-                    .all()
-                    
-        
-        serialized_data = []
-        
-        
-        for job_with_progress in jobs_with_dev:
-            serialized_job = asdict(job_with_progress)
-            
-            del serialized_job['contractor']
-            
-            serialized_job['developer'] = serialized_job['developer']['name']
-            
-            serialized_data.append(serialized_job)
-            
-        
-        for job in jobs_with_no_progress:
-            
-            serialized_job = asdict(job)
-            
-            del serialized_job['contractor']
-                    
-            serialized_data.append(serialized_job)
-        
-        return jsonify(serialized_data), 200
+    found_contractor = ContractorModel.query.filter_by(email=current_contractor['email']).first()
+    if found_contractor == None:
+        return {"message": "Contractor account not found"}, 404
+    data = request.args
+    page = request.args.get('page', 1, int)
+    per_page = request.args.get('per_page', 5, int)
+    jobs = []
 
-    except UserNotFoundError as e:
-        return {'message': str(e)}, 404
+
+    if 'progress' not in data:
+        query = JobModel.query.filter(JobModel.contractor_id == found_contractor.id).paginate(page=page, per_page=per_page, error_out=True).items
+        formatted_job_list = [asdict(item) for item in query]
+        for d in formatted_job_list:
+            if d['developer']:
+                d['developer']['birthdate'] = datetime.strftime(d['developer']['birthdate'], "%d/%m/%y")
+            d['expiration_date'] = datetime.strftime(d['expiration_date'], "%d/%m/%y %H:%M")
+            del d['contractor']
+            jobs.append(d)
+        return jsonify(jobs)
+    elif 'progress' in data:
+        if data['progress'] == 'None':
+            query = JobModel.query.filter(JobModel.contractor_id == found_contractor.id, JobModel.progress == None).paginate(page=page, per_page=per_page, error_out=True).items
+        else:
+            query = JobModel.query.filter(JobModel.contractor_id == found_contractor.id, JobModel.progress == data['progress']).paginate(page=page, per_page=per_page, error_out=True).items
+        if query:
+            formatted_job_list = [asdict(item) for item in query]
+            
+            for d in formatted_job_list:
+                if d['developer']:
+                    d['developer']['birthdate'] = datetime.strftime(d['developer']['birthdate'], "%d/%m/%y")
+                d['expiration_date'] = datetime.strftime(d['expiration_date'], "%d/%m/%y %H:%M")
+                del d['contractor']
+                jobs.append(d)
+            
+        return jsonify(jobs)
+    else:
+        return {"message": "The values for job progress are:  None, ongoing and completed"}, 406
+
+
+
+
+
+        
+
