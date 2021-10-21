@@ -162,8 +162,22 @@ def get_all_jobs():
     jobs = session.query(JobModel)\
                   .filter(JobModel.progress==None)\
                   .all()
-
-    return jsonify(jobs), 200
+                  
+    serialized_data = []
+    
+    for job in jobs:
+        
+        job = asdict(job)
+        
+        job['expiration_date'] = datetime.strftime(job['expiration_date'], "%d/%m/%Y %H:%M")
+        
+        if job.get('developer'):
+            job['developer']['birthdate'] = datetime.strftime(job['developer']['birthdate'], "%d/%m/%Y")
+            
+        serialized_data.append(job)
+        
+        
+    return jsonify(serialized_data), 200
 
 
     
