@@ -674,14 +674,9 @@ freeladev.com/api/contractors/jobs?progress=None&page=1&per_page=2
     "description": "a website about astronomy",
     "price": 3000.0,
     "difficulty_level": "beginner",
-    "expiration_date": "Sun, 12 Dec 2021 23:59:00 GMT",
+    "expiration_date": "07/07/2023",
     "progress": null,
-    "developer": null,
-    "contractor": {
-      "name": "Kika06",
-      "email": "kisaa87@gmail.com",
-      "cnpj": "16.466.789/0000-00"
-   }
+    "developer": null
   }
 ]
 ```
