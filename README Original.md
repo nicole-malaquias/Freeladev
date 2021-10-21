@@ -1,6 +1,8 @@
 ## <font size="7">**FreelaDev**</font>
 
 ​
+## <font size="6">Base URL https://freela-dev.herokuapp.com/api </font>
+
 
 ## <font size="6">Routes</font>
 
@@ -26,6 +28,8 @@ freeladev.com/api
 }
 ```
 
+
+
 ### <font color="purple"> GET </font> List of developers
 
 ​
@@ -42,26 +46,11 @@ freeladev.com/api/developers
 }
 ```
 
-### <font color="purple"> GET </font> Get profile info *****
+
+
+
 
 ​
-
-```json
-freeladev.com/api/developers/profile
-```
-
-```json
-{
-  "name": "Vitor Menezes",
-  "email": "menezes.vitor@mail.com",
-  "birthdate": "17/10/1990"
-}
-```
-
-​
-
-​
-
 ### <font color="purple"> GET </font> List of contractors
 
 ​
@@ -379,6 +368,40 @@ freeladev.com/api/job/create
 
 ​
 
+### <font color="purple"> GET </font> Get job by price and difficulty
+
+​
+
+```json
+freeladev.com/api/job/info?price=3000&difficulty=beginner
+```
+
+<font color="yellow"> _Response_ </font>
+​
+If it's a developer using the route it'll also return:
+
+
+```json
+  {
+    "id": 1,
+    "name": "SpaceBlog",
+    "description": "a website about astronomy",
+    "price": 3000.0,
+    "difficulty_level": "beginner",
+    "expiration_date": "Sun, 12 Dec 2021 23:59:00 GMT",
+    "progress": null,
+    "developer": null,
+    "contractor": {
+      "name": "Kika06",
+      "email": "kisaa87@gmail.com",
+      "cnpj": "16.466.789/0000-00"
+    }
+  }
+```
+
+
+
+
 ### <font color="purple"> GET </font> Information about a specific job
 
 ​
@@ -423,6 +446,7 @@ If it's a contractor using the route it'll also return if there's already a deve
   "developer_birthday": "01/01/1998"
 }
 ```
+
 
 ### <font color="purple"> GET </font> Get job by Tech *****
 
