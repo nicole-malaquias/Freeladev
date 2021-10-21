@@ -171,6 +171,9 @@ def get_all_jobs():
         
         job['expiration_date'] = datetime.strftime(job['expiration_date'], "%d/%m/%Y %H:%M")
         
+        if job.get('developer'):
+            job['developer']['birthdate'] = datetime.strftime(job['developer']['birthdate'], "%d/%m/%Y")
+            
         serialized_data.append(job)
         
         
