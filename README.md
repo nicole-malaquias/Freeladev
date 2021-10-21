@@ -663,13 +663,25 @@ freeladev.com/api/contractors/jobs?progress=None&page=1&per_page=2
 
 ```
 
-<font color="caramel"> _Request_ </font>
+<font color="caramel"> _Response_ </font>
 ​
 
 ```json
 [
-  {
-    "progress": "completed",
+  { 
+    "id": 1,
+    "name": "SpaceBlog",
+    "description": "a website about astronomy",
+    "price": 3000.0,
+    "difficulty_level": "beginner",
+    "expiration_date": "Sun, 12 Dec 2021 23:59:00 GMT",
+    "progress": null,
+    "developer": null,
+    "contractor": {
+      "name": "Kika06",
+      "email": "kisaa87@gmail.com",
+      "cnpj": "16.466.789/0000-00"
+   }
   }
 ]
 ```
