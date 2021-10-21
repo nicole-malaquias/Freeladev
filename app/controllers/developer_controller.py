@@ -184,7 +184,6 @@ def update_profile_info():
             data['password_hash'] = developer.password_hash
             
         if data.get('technologies'):
-            DevelopersTechsModel.delete_developer_techs(found_developer.id)
             
             technologies = data.pop('technologies')
             
@@ -201,7 +200,9 @@ def update_profile_info():
                     
                     avaliable_technologies.append(tech['name'])
                 
-                
+                if avaliable_technologies:
+                    DevelopersTechsModel.delete_developer_techs(found_developer.id)
+                    
             for developer_tech in developer_techs:
                 DevelopersTechsModel.insert_developer_techs(developer_tech)
                 
