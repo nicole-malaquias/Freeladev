@@ -24,7 +24,9 @@ freeladev.com/api
   "price": 3000,
   "difficulty_level": "beginner",
   "expiration_date": "12/12/2021 23:59",
-  "contractor": {"name": "Thiago Almeida" "email": "thiagoi43@gmail.com", "cnpj": "13.339.532/0001-09"}
+  "contractor": {"name": "Thiago Almeida",
+  "email":"thiagoi43@gmailcom", 
+  "cnpj": "13.339.532/0001-09"}
 }
 ```
 
@@ -42,7 +44,8 @@ freeladev.com/api/developers
 {
   "name": "Vitor Menezes",
   "email": "menezes.vitor@mail.com",
-  "birthdate": "17/10/1990"
+  "birthdate": "17/10/1990",
+  "technologies": [{"name": "python"}, {"name": "javascript"}]
 }
 ```
 
@@ -70,6 +73,14 @@ freeladev.com/api/contractors
 ```
 
 ​
+cnpj can be optional
+
+```json
+{
+  "name": "Pedro Musk",
+  "email": "pedro.space@mail.com",
+}
+```
 
 # Developer
 
@@ -97,7 +108,7 @@ freeladev.com/api/login
 
 ```json
 {
-  "acess_token": "SnwWei31203kj"
+  "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTYzNDc3NzQ2OSwianRpIjoiN2ZmY2YwMmMtNmY5Zi00ZDdjLTgzNWMtNWRkMmNmMjQxODFhIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJuYW1lIjoiYmlsbGllIiwiZW1haWwiOiJiaWxsaWVAZ21haWwuY29tIiwiYmlydGhkYXRlIjoiVGh1LCAxMiBEZWMgMjAwMiAwMzowMDowMCBHTVQifSwibmJmIjoxNjM0Nzc3NDY5LCJleHAiOjE2MzQ3NzgzNjl9.GuL7ZL3zwKDndeMDUGXYbInyJ1egt-dngY80TIIiQHo"
 }
 ```
 
@@ -120,7 +131,8 @@ freeladev.com/api/developers/signup
 "email": "kidakdssxo@mail.com",
 "password": "Nino2016*#",
 "birthdate": "01/01/2012",
-"technologies": [{"name": "python"}, {"name": "react"}]
+"technologies": [{"name": "python"},
+ {"name": "react"}]
 }
 ```
 
@@ -132,7 +144,9 @@ freeladev.com/api/developers/signup
 {
   "name": "Thiago Camargo",
   "email": "thiago.camargo@mail.com",
-  "birthdate": "07/07/1998"
+  "birthdate": "07/07/1998",
+  "technologies": [{"name": "python"},
+  {"name": "react"}]
 }
 ```
 
@@ -151,7 +165,9 @@ freeladev.com/api/developers/profile
 {
   "name": "Thiago Camargo",
   "email": "thiago.camargo@mail.com",
-  "birthdate": "07/07/1998"
+  "birthdate": "07/07/1998",
+  "technologies": [{"name": "python"},
+ {"name": "react"}]
 }
 ```
 
@@ -171,8 +187,7 @@ Can contain:
 "<font color="lightblue">email</font>" and/or
 "<font color="lightblue">birthdate</font>" and/or
 "<font color="lightblue">technologies</font>"
-
-<font color="caramel"> _Request_ </font>
+"<font color="caramel"> _Request_ </font>"
 
 ```json
 {
@@ -188,7 +203,9 @@ Can contain:
 {
   "name": "Thiago Camargo",
   "email": "thiago.camargo@mail.com.br",
-  "birthdate": "07/07/1998"
+  "birthdate": "07/07/1998",
+  "technologies": [{"name": "python"},
+   {"name": "react"}]
 }
 ```
 
@@ -281,10 +298,9 @@ freeladev.com/api/contractor/update
 ​
 Body json can contain:
 "<font color="lightblue">name</font>",
-"<font color="lightblue">email</font>" e
+"<font color="lightblue">email</font>" 
 "<font color="lightblue">cnpj</font>"
-​\
-<font color="caramel"> _Request_ </font>
+"<font color="caramel"> _Request_ </font>"
 ​
 
 ```json
@@ -333,7 +349,7 @@ NO CONTENT, 204
 ​
 
 ```json
-freeladev.com/api/job/create
+freeladev.com/api/jobs/create
 ```
 
 ​
@@ -373,7 +389,7 @@ freeladev.com/api/job/create
 ​
 
 ```json
-freeladev.com/api/job/info?price=3000&difficulty=beginner
+freeladev.com/api/jobs/info?price=3000&difficulty=beginner
 ```
 
 <font color="yellow"> _Response_ </font>
@@ -382,21 +398,21 @@ If it's a developer using the route it'll also return:
 
 
 ```json
-  {
-    "id": 1,
-    "name": "SpaceBlog",
-    "description": "a website about astronomy",
-    "price": 3000.0,
-    "difficulty_level": "beginner",
-    "expiration_date": "Sun, 12 Dec 2021 23:59:00 GMT",
-    "progress": null,
-    "developer": null,
-    "contractor": {
-      "name": "Kika06",
-      "email": "kisaa87@gmail.com",
-      "cnpj": "16.466.789/0000-00"
+    {
+      "id": 1,
+      "name": "SpaceBlog",
+      "description": "a website about astronomy",
+      "price": 3000.0,
+      "difficulty_level": "beginner",
+      "expiration_date": "07/07/2022",
+      "progress": null,
+      "developer": null,
+      "contractor": {
+        "name": "Kika06",
+        "email": "kisaa87@gmail.com",
+        "cnpj": "16.466.789/0000-00"
+      }
     }
-  }
 ```
 
 
@@ -415,35 +431,19 @@ freeladev.com/api/job/info/<job_id>
 
 ```json
 {
-  "name": "SpaceBlog",
-  "description": "a website about astronomy",
-  "price": 3000,
+  "id": 63,
+  "name": "Project with python",
+  "description": "a website about astronomy, using python, react, java, flask, springboot",
+  "price": 3000.0,
   "difficulty_level": "beginner",
-  "expiration_date": "12/12/2021 23:59",
-  "progress": "ongoing"
-}
-```
-
-If it's a developer using the route it'll also return:
-​
-
-```json
-{
-  "contractor_name": "Thiago Camargo",
-  "contractor_email": "tiago54@gmail.com",
-  "contractor_cnpj": "47.812.481/0001-02"
-}
-```
-
-​
-If it's a contractor using the route it'll also return if there's already a developer assigned to the job:
-​
-
-```json
-{
-  "developer": "Thiago Camargo",
-  "developer_email": "tiago32@gmail.com",
-  "developer_birthday": "01/01/1998"
+  "expiration_date": "Sun, 12 Dec 2021 23:59:00 GMT",
+  "progress": null,
+  "developer": null,
+  "contractor": {
+    "name": "Rubens",
+    "email": "rubesns89@gmail.com",
+    "cnpj": "97.789.087/1245-09"
+  }
 }
 ```
 
@@ -467,29 +467,6 @@ freeladev.com/api/job
   "difficulty_level": "beginner",
   "expiration_date": "12/12/2021 23:59",
   "progress": "ongoing"
-}
-```
-
-If it's a developer using the route it'll also return:
-​
-
-```json
-{
-  "contractor_name": "Thiago Camargo",
-  "contractor_email": "tiago54@gmail.com",
-  "contractor_cnpj": "47.812.481/0001-02"
-}
-```
-
-​
-If it's a contractor using the route it'll also return if there's already a developer assigned to the job:
-​
-
-```json
-{
-  "developer": "Thiago Camargo",
-  "developer_email": "tiago32@gmail.com",
-  "developer_birthday": "01/01/1998"
 }
 ```
 
@@ -520,9 +497,11 @@ If it's a developer using the route it'll also return:
 
 ```json
 {
-  "contractor_name": "Thiago Camargo",
-  "contractor_email": "tiago54@gmail.com",
-  "contractor_cnpj": "47.812.481/0001-02"
+  "contractor": {
+    "name": "Rubens",
+    "email": "rubesns89@gmail.com",
+    "cnpj": "97.789.087/1245-09"
+  }
 }
 ```
 
@@ -551,21 +530,23 @@ Body json can contain:
 "<font color="lightblue">name</font>",
 "<font color="lightblue">description</font>",
 "<font color="lightblue">price</font>",
-"<font color="lightblue">difficulty\*level</font>",
-"<font color="lightblue">expiration\*date</font>" e
-"<font color="lightblue">developer*email</font>"
-​
-<font color="caramel"> \_Request* </font>
+"<font color="lightblue">difficulty\_level</font>",
+"<font color="lightblue">expiration\_date</font>" e
+"<font color="lightblue">developer: email</font>"
+
+
+<font color="caramel"> \
+_Request_ </font>
 ​
 
 ```json
 {
-  "developer_email": "vi32@gmail.com"
+  "developer": "vi32@gmail.com"
 }
 ```
 
 ​
-<font color="yellow"> _Response_ </font>
+<font color="yellow"> \_Response_ </font>
 ​
 
 ```json
@@ -576,7 +557,9 @@ Body json can contain:
     "difficulty_level": "beginner",
     "expiration_date": "12/12/2021 23:59",
     "progress": "ongoing",
-    "developer": {"name": "Filipe Ramos", "email": "filipe43@gmail.com", "birthdate": "01/01/1998"}
+    "developer": {"name": "Filipe Ramos",
+    "email": "filipe43@gmail.com",
+    "birthdate": "01/01/1998"}
 
 }
 ```
@@ -584,7 +567,7 @@ Body json can contain:
 ​
 ​
 
-### <font color="red"> Delete </font> Delete a job
+### <font color="red"> DELETE </font> Delete a job you must owner of the job to delete it 
 
 ​
 
@@ -593,7 +576,8 @@ freeladev.com/api/job/delete/<job_id>
 ```
 
 ​
-<font color="yellow"> _Response_ </font>
+<font color="yellow"> \
+_Response_ </font>
 ​
 
 ```json
@@ -622,7 +606,8 @@ freeladev.com/api/developers/jobs
     "difficulty_level": "begginer",
     "expiration_date": "06/06/2021 23:59",
     "progress": "completed",
-    "contractor": {"name": "Thiago Almeida" "email": "thiagoi43@gmail.com", "cnpj": "10.332.532/0002-09"}
+    "contractor": {"name": "Thiago Almeida" "email": "thiagoi43@gmail.com",
+    "cnpj": "10.332.532/0002-09"}
   },
   {
     "name": "SpaceBlog",
@@ -631,7 +616,8 @@ freeladev.com/api/developers/jobs
     "difficulty_level": "beginner",
     "expiration_date": "12/12/2021 23:59",
     "progress": "ongoing",
-    "contractor": {"name": "Thiago Almeida" "email": "thiagoi43@gmail.com", "cnpj": "13.339.532/0001-09"}
+    "contractor": {"name": "Thiago Almeida" "email": "thiagoi43@gmail.com",
+    "cnpj": "13.339.532/0001-09"}
   }
 ]
 ```
@@ -658,19 +644,6 @@ freeladev.com/api/contractor/jobs
     "difficulty_level": "advanced",
     "expiration_date": "08/08/2021 23:59",
     "progress": "completed",
-    "developer": {
-      "name": "Filipe Ramos",
-      "email": "filipe43@gmail.com",
-      "birthdate": "01/01/1998"
-    }
-  },
-  {
-    "name": "SpaceBlog",
-    "description": "a website about astronomy",
-    "price": 3000,
-    "difficulty_level": "beginner",
-    "expiration_date": "12/12/2021 23:59",
-    "progress": "ongoing",
     "developer": {
       "name": "Filipe Ramos",
       "email": "filipe43@gmail.com",
