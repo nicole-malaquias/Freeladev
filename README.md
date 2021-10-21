@@ -659,8 +659,7 @@ freeladev.com/api/contractor/jobs
 ​
 
 ```json
-freeladev.com/api/contractors/jobs/progress?progress=None&page=1&per_page=1
-
+freeladev.com/api/contractors/jobs?progress=None&page=1&per_page=2
 
 ```
 
