@@ -150,60 +150,9 @@ def get_all_contractors():
                   .all()
     return jsonify(contractors)
 
+
 @jwt_required()
 def get_all_contractor_jobs():
-   
-    current_contractor = get_jwt_identity()
-    
-    try:
-        
-        found_contractor = ContractorModel.query.filter_by(email=current_contractor['email']).first()
-        
-        if not found_contractor:
-            raise UserNotFoundError
-        session = current_app.db.session
-        
-        base_query =  session.query(JobModel)\
-                    .filter(JobModel.contractor_id==found_contractor.id)
-                    
-        jobs_with_dev = base_query\
-                    .filter(DeveloperModel.id==JobModel.developer_id)\
-                    .filter(JobModel.progress!=None)\
-                    .all()
-                    
-        jobs_with_no_progress = base_query\
-                    .filter(JobModel.progress==None)\
-                    .all()
-                    
-        
-        serialized_data = []
-        
-        
-        for job_with_progress in jobs_with_dev:
-            serialized_job = asdict(job_with_progress)
-            
-            del serialized_job['contractor']
-            
-            serialized_job['developer'] = serialized_job['developer']['name']
-            
-            serialized_data.append(serialized_job)
-            
-        
-        for job in jobs_with_no_progress:
-            
-            serialized_job = asdict(job)
-            
-            del serialized_job['contractor']
-                    
-            serialized_data.append(serialized_job)
-        
-        return jsonify(serialized_data), 200
-
-    except UserNotFoundError as e:
-        return {'message': str(e)}, 404
-
-@jwt_required()
-def get_contractor_jobs_by_progress_status():
     current_contractor = get_jwt_identity()
     found_contractor = ContractorModel.query.filter_by(email=current_contractor['email']).first()
     if found_contractor == None:
