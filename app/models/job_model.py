@@ -1,7 +1,6 @@
 from sqlalchemy.orm import backref, relationship
 from app.configs.database import db
 from dataclasses import dataclass
-from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from app.models.developer_model import DeveloperModel
 from app.models.contractor_model import ContractorModel
@@ -36,7 +35,7 @@ class JobModel(db.Model):
     contractor = relationship('ContractorModel', backref=backref('jobs'))
     
     def format_expiration_date(self):
-        self.expiration_date = datetime.strftime(self.expiration_date, "%d/%m/%y %H:%M")
+        self.expiration_date = datetime.strftime(self.expiration_date, "%d/%m/%Y %H:%M")
 
 
     def update_job_if_developer_or_progress_is_null(job):
@@ -64,7 +63,7 @@ class JobModel(db.Model):
         JobModel.query.filter_by(id=job_id).update(data)
         current_app.db.session.commit()
         job.progress = "ongoing"
-        developer_birthdate = datetime.strftime(developer.birthdate, "%d/%m/%y %H:%M")
+        developer_birthdate = datetime.strftime(developer.birthdate, "%d/%m/%Y")
         return jsonify({"name": job.name,  "description": job.description, "price": job.price, "difficulty_level": job.difficulty_level, "expiration_date": job.format_expiration_date(), "progress": job.progress, "developer": [{"name": developer.name, "email": developer.email, "birthdate": developer_birthdate}]})
 
 
@@ -72,5 +71,5 @@ class JobModel(db.Model):
         JobModel.query.filter_by(id=job.id).update(data) 
         db.session.commit()  
         developer = DeveloperModel.query.filter_by(id=job.developer_id).first()  
-        developer_birthdate = datetime.strftime(developer.birthdate, "%d/%m/%y %H:%M")          
+        developer_birthdate = datetime.strftime(developer.birthdate, "%d/%m/%Y")          
         return jsonify({"name": job.name,  "description": job.description, "price": job.price, "difficulty_level": job.difficulty_level, "expiration_date": job.expiration_date, "progress": job.progress, "developer": [{"name": developer.name, "email": developer.email, "birthdate": developer_birthdate}]})
